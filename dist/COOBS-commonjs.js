@@ -37,7 +37,11 @@ COOBS.VoxelMesh.prototype.setMesher = function(type) {
 //Set the voxel at x,y,z position, with the id metadata.
 COOBS.VoxelMesh.prototype.setVoxelAt = function(x,y,z, metaData) {
 	if(this.voxelData.voxels != null) {
-		this.voxelData.voxels[x+(y*this.voxelData.dimensions[0])+(z*this.voxelData.dimensions[0]*this.voxelData.dimensions[1])] = metaData;
+		if(Array.isArray(x)) {
+			this.voxelData.voxels[x[0]+(x[1]*this.voxelData.dimensions[0])+(x[2]*this.voxelData.dimensions[0]*this.voxelData.dimensions[1])] = y;
+		} else {
+			this.voxelData.voxels[x+(y*this.voxelData.dimensions[0])+(z*this.voxelData.dimensions[0]*this.voxelData.dimensions[1])] = metaData;
+		}
 	} else {
 		return 'Error: please set the dimensions of the voxelData first!';
 	}
@@ -49,9 +53,9 @@ COOBS.VoxelMesh.prototype.setVoxelBatch = function(voxels, metaData) {
 	for(var i = 0; i < voxels.length; i++) {
 		var voxel = voxels[i];
 		if(voxel.length < 4 && metaData != null) {
-			this.setVoxelAt(voxel[0], voxel[1], voxel[2], metaData);
+			this.setVoxelAt(voxel, metaData);
 		} else {
-			this.setVoxelAt(voxel[0], voxel[1], voxel[2], voxel[3]);
+			this.setVoxelAt(voxel, voxel[3]);
 		}
 	}
 }
@@ -188,4 +192,57 @@ COOBS.VoxelMesh.prototype.exportVoxelData = function(raw) {
 	return {dimensions: this.voxelData.dimensions, voxels: convertedVoxels};
 }
 
-module.exports = COOBS;
+
+COOBS.VoxelMesh.handlePick = function(pickResult) {
+	var mesh = pickResult.pickedMesh;
+	var point = pickResult.pickedPoint;
+	
+	var m = new BABYLON.Matrix();
+	mesh.getWorldMatrix().invertToRef(m);
+	var v = BABYLON.Vector3.TransformCoordinates(point, m);
+	var x,y,z, voxel1,voxel2;
+	
+	var offsetX = +(v.x-v.x.toFixed(0)).toFixed(4);
+	var offsetY = +(v.y-v.y.toFixed(0)).toFixed(4);
+	var offsetZ = +(v.z-v.z.toFixed(0)).toFixed(4);
+	
+	if(offsetX == 0) {
+		x = Math.round(v.x);
+		y = Math.floor(v.y);
+		z = Math.floor(v.z);
+		if(x>=mesh.voxelData.dimensions[0]) x=mesh.voxelData.dimensions[0]-1;
+
+		voxel1 = [x,y,z];
+		voxel2 = [x-1,y,z];
+	} else if (offsetY == 0) {
+		x = Math.floor(v.x);
+		y = Math.round(v.y);
+		z = Math.floor(v.z);
+		if(y>=mesh.voxelData.dimensions[1]) y=mesh.voxelData.dimensions[1]-1;
+
+		voxel1 = [x,y,z];
+		voxel2 = [x,y-1,z];
+	} else if (offsetZ == 0) {
+		x = Math.floor(v.x);
+		y = Math.floor(v.y);
+		z = Math.round(v.z);
+		if(z>=mesh.voxelData.dimensions[2]) z=mesh.voxelData.dimensions[2]-1;
+
+		voxel1 = [x,y,z];
+		voxel2 = [x,y,z-1];
+	}
+	
+	if(!mesh.getVoxelAt(voxel1[0],voxel1[1],voxel1[2])) {
+		pickResult.over = voxel1;
+		pickResult.under = voxel2;
+		return pickResult;
+	} else {
+		pickResult.over = voxel2;
+		pickResult.under = voxel1;
+		return pickResult;
+	}
+}
+
+if(!window.COOBS) {
+	module.exports = COOBS;
+}
