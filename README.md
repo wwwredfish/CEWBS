@@ -1,4 +1,4 @@
-COOBS ([Demo](http://triblade9.wc.lt/COOBS/index.html))
+CEWBS ([Demo](http://triblade9.wc.lt/CEWBS/index.html))
 =====
 
 A Voxel Mesher for BabylonJS. Supports both Greedy And Monotone Meshing, based on http://mikolalysenko.github.io/MinecraftMeshes2/
@@ -15,19 +15,19 @@ Internally, voxels are stored as a flat array for speed, so be careful when chan
 
 **Usage:**
 
-Include COOBS in your HTML file, after BabylonJS and its dependencies.
+Include CEWBS in your HTML file, after BabylonJS and its dependencies.
 ```html
-<script src="COOBS.min.js"></script>
+<script src="CEWBS.min.js"></script>
 ```
 Or, if using node-webkit, require the commonJS version.
 ```javascript
-var COOBS = require('COOBS-commonjs.js');
+var CEWBS = require('CEWBS-commonjs.js');
 ```
 
 Set up your scene as [normal](https://github.com/BabylonJS/Babylon.js/wiki/01---Basic-scene).
 ```javascript
 //Create the mesh like a standard Babylon Mesh.
-var voxMesh1 = new COOBS.VoxelMesh('testMesh1', scene);
+var voxMesh1 = new CEWBS.VoxelMesh('testMesh1', scene);
 
 //Set the bounding box of the Voxel area, !IMPORTANT! [Does not need to be cubic, can be rectangular]
 //If your code stops working, it's probably because you forgot to set the dimensions before anything else.
@@ -77,8 +77,8 @@ window.addEventListener("click", function (evt) {
 	var pickResult = scene.pick(evt.clientX, evt.clientY); //Perform a BabylonJS pick
 	var mesh = pickResult.pickedMesh; //Get the mesh picked
 	
-	if(mesh != null && mesh instanceof COOBS.VoxelMesh) { //Make sure it's a COOBS voxelmesh
-		var pickedVoxels = COOBS.VoxelMesh.handlePick(pickResult); //Get the picked voxels object, which wraps pickResult
+	if(mesh != null && mesh instanceof CEWBS.VoxelMesh) { //Make sure it's a CEWBS voxelmesh
+		var pickedVoxels = CEWBS.VoxelMesh.handlePick(pickResult); //Get the picked voxels object, which wraps pickResult
 		if(evt.which == 1) {
 			mesh.setVoxelAt(pickedVoxels.under, 0); //Remove the block that is pointed at.
 		} else if(evt.which == 3) {
@@ -88,7 +88,7 @@ window.addEventListener("click", function (evt) {
 	}
 });
 ```
-`COOBS.VoxelMesh.handlePick(pickResult)` takes a BabylonJS pick and returns it with the additional properties
+`CEWBS.VoxelMesh.handlePick(pickResult)` takes a BabylonJS pick and returns it with the additional properties
 `under` and `over`, which are both arrays of x,y,and z voxel coordinates in the picked mesh.
 `under` is the voxel that was picked, and `over` is the voxel adjacent to the face of the voxel that was picked.
 
