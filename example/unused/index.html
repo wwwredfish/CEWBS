@@ -1,0 +1,269 @@
+<!doctype html>
+<html>
+	<head>
+		<title>CEWBS Engine Tester</title>
+		<meta charset="utf-8">
+		
+			
+	<script src="vendor/babylon.js"></script>
+	<script src="vendor/hand.js"></script>
+	<script src="vendor/CEWBS.min.js"></script>
+	<script>
+		global.BABYLON = BABYLON;
+	</script>
+	
+	<link  href="css/main.css" rel="stylesheet"/>
+	</head>
+<body>
+    <canvas id="viewport"></canvas>
+	<img id="gunsight" src="gunsight.png" />
+
+	<script type="text/javascript">
+		var canvas = document.getElementById("viewport");
+		
+		var engine = new BABYLON.Engine(canvas, true);
+		var sphere, camera;
+		var createScene = function () {
+			scene = new BABYLON.Scene(engine);
+			scene.gravity = new BABYLON.Vector3(0,-0.2,0);
+			scene.clearColor = new BABYLON.Color3(0.7,0.7,0.7);
+			camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 10, 0), scene);
+			camera.ellipsoid = new BABYLON.Vector3(0.6, 1.1, 0.6);
+			camera.checkCollisions = true;
+			camera.applyGravity = false;
+			camera.keysUp = [87];
+			camera.keysDown = [83];
+			camera.keysLeft = [65]; // Q
+			camera.keysRight = [68]; // D
+			camera.speed = 5;
+			camera.inertia = 0.6;
+			camera.angularSensibility = 500;
+		
+			camera.setTarget(BABYLON.Vector3.Zero());
+		
+			camera.attachControl(canvas, false);
+			
+			var light0 = new BABYLON.HemisphericLight("Hemi0", new BABYLON.Vector3(0, 1, 0), scene);
+			light0.diffuse = new BABYLON.Color3(1.2, 1.2, 1.2);
+			light0.specular = new BABYLON.Color3(0.2, 0.2, 0.2);
+			light0.groundColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+			
+			return scene;
+		
+		};
+		
+		var scene = createScene();
+		initPointerLock();
+
+		engine.runRenderLoop(function () {
+			scene.render();			
+		});
+		
+		window.addEventListener("resize", function () {
+			engine.resize();
+		});
+		
+		//var CEWBS = require('../CEWBS.js');
+		var voxMesh1 = new CEWBS.VoxelMesh('testMesh1', scene);
+		var voxColors = [
+			[0,0,0],
+			[20,120,0],
+			[0,122,0],
+			[20,124,0],
+			[0,126,0],
+			[20,128,0],
+			[0,130,0],
+			[20,132,0],
+			[0,134,0],
+			[20,136,0],
+			[0,138,0],
+			[20,140,0],
+			[255,0,0]
+		]
+		
+		voxMesh1.coloringFunction = function(id) {
+			return voxColors[id];
+		}
+		voxMesh1.setVoxelData({dimensions: [16,16,16], voxels: generateVoxels([16,16,16])});
+		voxMesh1.originToCenterOfBounds();
+		voxMesh1.updateMesh();
+		voxMesh1.position = new BABYLON.Vector3(0,0,0);
+		voxMesh1.checkCollisions = true;
+		
+		var voxMesh2 = new CEWBS.VoxelMesh('testMesh2', scene);
+		voxMesh2.coloringFunction = function(id) {
+			return voxColors[id];
+		}
+		voxMesh2.setVoxelData({dimensions: [8,8,8], voxels: generateVoxels([8,8,8])});
+		voxMesh2.updateMesh();
+		voxMesh2.scaling = new BABYLON.Vector3(0.125,0.125,0.125);
+		voxMesh2.position = new BABYLON.Vector3(3.5,8.5,3.5);
+		voxMesh2.originToCenterOfBounds();
+		voxMesh2.checkCollisions = true;
+		
+		var voxMesh3 = new CEWBS.VoxelMesh('testMesh3', scene);
+		voxMesh3.coloringFunction = function(id) {
+			return voxColors[id];
+		}
+		voxMesh3.setVoxelData({dimensions: [8,8,8], voxels: generateVoxels([8,8,8])});
+		voxMesh3.updateMesh();
+		voxMesh3.scaling = new BABYLON.Vector3(0.125,0.125,0.125);
+		voxMesh3.parent = voxMesh1;
+		voxMesh3.position = new BABYLON.Vector3(9.5,16,9.5);
+		voxMesh3.originToCenterOfBounds(true);
+		voxMesh3.checkCollisions = true;
+		
+		var voxMesh4 = new CEWBS.VoxelMesh('testMesh4', scene);
+		voxMesh4.coloringFunction = function(id) {
+			return voxColors[id];
+		}
+		voxMesh4.setDimensions([8,8,8]);
+		voxMesh4.setVoxelAt(0,0,0, 1);
+		voxMesh4.updateMesh();
+		voxMesh4.scaling = new BABYLON.Vector3(0.125,0.125,0.125);
+		voxMesh4.parent = voxMesh1;
+		voxMesh4.position = new BABYLON.Vector3(6.5,16,9.5);
+		voxMesh4.originToCenterOfBounds(true);
+		voxMesh4.checkCollisions = true;
+		
+		goingUp = true;
+		scene.registerBeforeRender(function() {
+			voxMesh2.rotation.y+=0.01;
+			
+			if(voxMesh2.position.y >= 9.5) {
+				goingUp = false;
+			} else if(voxMesh2.position.y <= 8.5)  {
+				goingUp = true;
+				
+			}
+			if(goingUp) {
+				voxMesh2.position.y += 0.01;
+			} else {
+				voxMesh2.position.y -= 0.01;
+			}
+			voxMesh1.rotation.y+=0.001;
+			
+		});
+
+		var controlEnabled = false;
+		window.addEventListener("click", function (evt) {
+			var pickResult = scene.pick(evt.clientX, evt.clientY);
+			var mesh = pickResult.pickedMesh;
+			var point = pickResult.pickedPoint;
+			if(evt.which == 1 || evt.which == 3) {
+				if(mesh != null && mesh instanceof CEWBS.VoxelMesh) {
+					var pickedVoxels = CEWBS.VoxelMesh.handlePick(pickResult);
+					if(evt.which == 1) {
+						mesh.setVoxelAt(pickedVoxels.under, 0);
+					} else {
+						mesh.setVoxelAt(pickedVoxels.over, randomInt(1,11));
+					}
+					mesh.updateMesh();
+				}
+			} else {
+				if(!controlEnabled) {
+					canvas.requestPointerLock = canvas.requestPointerLock || canvas.msRequestPointerLock || canvas.mozRequestPointerLock || canvas.webkitRequestPointerLock;
+					if (canvas.requestPointerLock) {
+						canvas.requestPointerLock();
+					}
+				} else {
+					document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock || document.webkitExitPointerLock;
+					document.exitPointerLock();
+				}
+			}
+				
+		});
+		
+		document.body.addEventListener('keydown', function(evt) {
+			if(String.fromCharCode(evt.keyCode) == 'F') {
+				if(camera.applyGravity) {
+					camera.applyGravity = false;
+					camera.speed = 5;
+				} else {
+					camera.applyGravity = true;
+					camera.speed = 1.5;
+				}
+			}
+		});
+		
+		var sc = 0;
+		var xpoint = 0;
+		var zpoint = 0;
+		var stage = 0;
+		scene.registerBeforeRender(function() {
+			if(sc == 4) {
+				voxMesh4.setVoxelData({dimensions: [8,8,8], voxels: new Array(8*8*8)});
+				voxMesh4.setVoxelAt([xpoint,0,zpoint], randomInt(1,11));
+				for (var i = 1; i < randomInt(2,8); i++) {
+					voxMesh4.setVoxelAt([xpoint,i,zpoint], randomInt(1,11));
+				}
+				
+				if(stage == 0) {
+					xpoint++;
+					if(xpoint == 7) {
+						stage++;
+					}
+				} else if (stage == 1) {
+					zpoint++;
+					if(zpoint == 7) {
+						stage++;
+					}
+				} else if (stage == 2) {
+					xpoint--;
+					if(xpoint == 0) {
+						stage++;
+					}
+				} else if (stage == 3) {
+					zpoint--;
+					if(zpoint == 0) {
+						stage = 0;
+					}
+				}
+				
+				voxMesh4.updateMesh();
+				sc = 0;
+			}
+			sc++;
+		});
+		
+		
+		function randomInt(minimum, maximum) {
+			return Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;	
+		}
+		
+		function generateVoxels(dims) {
+			var voxels = [];
+			for (var i = 0; i < dims[0]*dims[1]*dims[2]; i++) {
+				var rand = randomInt(1,11);
+				voxels.push(rand);
+			}
+			return voxels;
+		}
+		
+		function initPointerLock() {
+		    // Request pointer lock
+		    var canvas = scene.getEngine().getRenderingCanvas();
+		    // Event listener when the pointerlock is updated (or removed by pressing ESC for example).
+		    var pointerlockchange = function (event) {
+		        controlEnabled = (
+		                           document.mozPointerLockElement === canvas
+		                        || document.webkitPointerLockElement === canvas
+		                        || document.msPointerLockElement === canvas
+		                        || document.pointerLockElement === canvas);
+		        // If the user is alreday locked
+		        if (!controlEnabled) {
+		            camera.detachControl(canvas);
+		        } else {
+		            camera.attachControl(canvas);
+		        }
+		    };
+		
+		    // Attach events to the document
+		    document.addEventListener("pointerlockchange", pointerlockchange, false);
+		    document.addEventListener("mspointerlockchange", pointerlockchange, false);
+		    document.addEventListener("mozpointerlockchange", pointerlockchange, false);
+		    document.addEventListener("webkitpointerlockchange", pointerlockchange, false);
+		}
+	</script>
+</body>
+</html>

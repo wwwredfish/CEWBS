@@ -4,6 +4,7 @@ var meshers = {
 }
 
 var CEWBS = {};
+CEWBS.version = '%VERSION%';
 
 CEWBS.VoxelMesh = function(name, scene) {
 	BABYLON.Mesh.call(this, name, scene);
