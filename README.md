@@ -96,6 +96,7 @@ window.addEventListener("click", function (evt) {
 Importing/Exporting Voxels:
 ---
 **CEWBS Import/Export**
+
 To copy voxels in an interchangable format that is not dependant on the dimensions, use `exportVoxelData()`, which
 returns an object in the form of
 
@@ -115,8 +116,10 @@ voxMesh1.setDimensions(exportedData.dimensions);
 voxMesh1.setVoxelBatch(exportedData.voxels, 1);
 ```
 
-**Zoxel Import/Export**
+**[Zoxel](https://github.com/grking/zoxel) Import/Export**
+
 *Note, transparency is not supported and is ignored.*
+
 *Note, animations are not supported. Import/export only deals with frame 1.*
 
 To export a Zoxel string, run `exportZoxel()` on the VoxelMesh that you wish to export. This returns a JSON string which can then be
