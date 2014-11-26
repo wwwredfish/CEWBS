@@ -13,23 +13,33 @@ Any additional data must be stored separately, at least for the moment.
 
 Internally, voxels are stored as a flat array for speed, so be careful when changing the dimensions of the mesh dynamically, as it will really flip out.
 
-**Usage (Currently only tested with node-webkit):**
+**Usage:**
+
+Include COOBS in your HTML file, after BabylonJS and its dependencies.
+```html
+<script src="COOBS.min.js"></script>
+```
+Or, if using node-webkit, require the commonJS version.
+```javascript
+var COOBS = require('COOBS-commonjs.js');
+```
 
 Set up your scene as [normal](https://github.com/BabylonJS/Babylon.js/wiki/01---Basic-scene).
 ```javascript
-var COOBS = require('Coobs.js');
-
 //Create the mesh like a standard Babylon Mesh.
 var voxMesh1 = new COOBS.VoxelMesh('testMesh1', scene);
 
 //Set the bounding box of the Voxel area, !IMPORTANT! [Does not need to be cubic, can be rectangular]
-voxMesh1.setDimensions(3,3,3);
+//If your code stops working, it's probably because you forgot to set the dimensions before anything else.
+voxMesh1.setDimensions([3,3,3]);
 ```
+All voxel meshes can be rotated, scaled, positioned, and parented without problem.
 
 To set voxels in the mesh, use
 ```javascript
-//setVoxelAt(x,y,z, meta);
+//setVoxelAt(x,y,z, meta); {Or ([x,y,z], meta)}
 voxMesh1.setVoxelAt(1,1,0, 2);
+voxMesh1.setVoxelAt([2,0,1], 3);
 ```
 or (Not recommended, all it does is loop over the array and call the above method.)
 ```javascript
@@ -46,11 +56,63 @@ After changing any voxel data, rebuild the optomized mesh using
 voxMesh1.updateMesh();
 ```
 
+Getting Voxels:
+---
+To retrieve the id of a voxel at a given position, use `getVoxelAt(x,y,z)`.
+
+You can also get the entirety of the voxel data using `getVoxelData()`.
+
+**Example:**
+
+```javascript
+var id = voxMesh1.getVoxelAt(1,2,2);
+```
+
+Picking (Selecting the clicked voxel):
+---
+To get the voxel clicked on by the user, use a standard BabylonJS collision pick like so.
+
+```javascript
+window.addEventListener("click", function (evt) {
+	var pickResult = scene.pick(evt.clientX, evt.clientY); //Perform a BabylonJS pick
+	var mesh = pickResult.pickedMesh; //Get the mesh picked
+	
+	if(mesh != null && mesh instanceof COOBS.VoxelMesh) { //Make sure it's a COOBS voxelmesh
+		var pickedVoxels = COOBS.VoxelMesh.handlePick(pickResult); //Get the picked voxels object, which wraps pickResult
+		if(evt.which == 1) {
+			mesh.setVoxelAt(pickedVoxels.under, 0); //Remove the block that is pointed at.
+		} else if(evt.which == 3) {
+			mesh.setVoxelAt(pickedVoxels.over, 2); //Place a block over the one that is pointed at.
+		}
+		mesh.updateMesh(); //Update the mesh
+	}
+});
+```
+`COOBS.VoxelMesh.handlePick(pickResult)` takes a BabylonJS pick and returns it with the additional properties
+`under` and `over`, which are both arrays of x,y,and z voxel coordinates in the picked mesh.
+`under` is the voxel that was picked, and `over` is the voxel adjacent to the face of the voxel that was picked.
+
+**Exporting Voxels:**
+To copy voxels in an interchangable format that is not dependant on the dimensions, use `exportVoxelData()`, which
+returns an object in the form of
+
+```javascript
+{
+	dimensions: [x,y,z],
+	voxels: [
+		[0,0,0, 3], //x,y,z coordinates, then the voxel id.
+		[1,1,0, 1],
+	],
+}
+```
+
+This can then be converted to formats used by other programs.
+
 Coloring Voxels:
 ---
-By default, the mesher just generates greyscale colors for the voxels depending on their id. You can change this easily by modifying the mesh's `coloringFunction` property.
+By default, the mesher just generates grayscale colors for the voxels depending on their id. You can change this easily by modifying the mesh's `coloringFunction` property.
 
-The coloring function is passed the voxel id, and is expected to return an array in the form of [RED, GREEN, BLUE], each value being a float ranging from 0 to 1. (Higher values work, and are effectively emmision colors.)
+The coloring function is passed the voxel id, and is expected to return an array in the form of [RED, GREEN, BLUE], each value being a integer ranging from 0 to 255. (Higher values work, and are effectively emmision colors.)
 
 If a custom coloringFunction is set, but no value returned, all voxels will be a bright pink, indicating that something went wrong.
 
@@ -58,8 +120,8 @@ If a custom coloringFunction is set, but no value returned, all voxels will be a
 ```javascript
 var voxColors = [
 	null, //ID 0 is air, and unused
-	[1,0,0], //ID 1 is red
-	[0,0,1] //ID 2 is blue
+	[255,0,0], //ID 1 is red
+	[0,0,255] //ID 2 is blue
 ]
 voxMesh1.coloringFunction = function(id) {
 	return voxColors[id];
@@ -69,19 +131,46 @@ voxMesh1.coloringFunction = function(id) {
 Utility:
 ---
 
+**Set center of mesh**
 Sets the pivot point of the mesh to the center of the dimensions. (Default is voxel position 0,0,0's bottom corner)
 Passing a boolean argument true will ignore the Y axis.
 **Example:**
+
 ```javascript
 voxMesh1.originToCenterOfBounds(); //Origin of a 5x5x5 mesh becomes 2.5,2.5,2.5
 voxMesh1.originToCenterOfBounds(true); //Ignores the Y axis. Origin of a 5x5x5 mesh becomes 2.5,0,2.5
 ```
 
+**Set the pivot point of the mesh**
+Sets the pivot point of the mesh to an arbitrary point in the world space. Best called before positioning the mesh.
+
+```javascript
+voxMesh1.setPivot(x,y,z);
+```
+
+This is essentially a wrapper for
+
+```javascript
+var pivot = BABYLON.Matrix.Translation(x,y,z);
+voxMesh1.setPivotMatrix(pivot);
+```
+
+and will likely be removed.
+
+**Change mesher algorithms**
+There are two meshing algorithms which can be used, greedy and monotone. (Both from http://mikolalysenko.github.io/MinecraftMeshes2/)
+Default is greedy. To select one, call
+
+```javascript
+voxMesh1.setMesher('monotone'); //Or greedy.
+```
+
+then update the mesh.
 
 TODO:
 ---
 **Short Term:**
-* Implement Picking
+* --Implement Picking-- DONE
 * Implement Damage levels (?)
 
 **Long Term Possibilities (Difficult due to meshing algorithms)**
@@ -90,4 +179,4 @@ TODO:
 
 LICENSE:
 ---
-HAVEN'T DECIDED
+MIT
