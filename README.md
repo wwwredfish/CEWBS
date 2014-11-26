@@ -1,4 +1,4 @@
-COOBS ([Demo](http://triblade9.wc.lt/COOBS/index.html)
+COOBS ([Demo](http://triblade9.wc.lt/COOBS/index.html))
 =====
 
 A Voxel Mesher for BabylonJS. Supports both Greedy And Monotone Meshing, based on http://mikolalysenko.github.io/MinecraftMeshes2/
