@@ -1,0 +1,46 @@
+/** Additional MVCJS Styles **/
+
+.MVCJS {
+	position: relative;
+	font-family: Arial, Helveceta, Sans-Serif;
+	box-sizing: border-box;
+}
+
+.MVCJS hr {
+	border-style: solid;
+	border-width: 2px;
+	border-radius: 2px;
+	color: #28A;
+}
+
+.MVCJS .blue {
+	border-bottom: 2px solid #0E93C4;
+}
+
+.MVCJS .red {
+	border-bottom: 2px solid #D8420F;
+}
+
+.MVCJS .orange {
+	border-bottom: 2px solid #FF9F15;
+}
+
+.MVCJS .yellow {
+	border-bottom: 2px solid #D8D40F;
+}
+
+.MVCJS .pink {
+	border-bottom: 2px solid #D80FAE;
+}
+
+.MVCJS .purple {
+	border-bottom: 2px solid #AE0FD8;
+}
+
+.MVCJS .white {
+	border-bottom: 2px solid #EEE;
+}
+
+.MVCJS .black {
+	border-bottom: 2px solid #111;
+}

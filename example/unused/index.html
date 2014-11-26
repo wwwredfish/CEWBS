@@ -147,7 +147,7 @@
 
 		var controlEnabled = false;
 		window.addEventListener("click", function (evt) {
-			var pickResult = scene.pick(evt.clientX, evt.clientY);
+			var pickResult = scene.pick(scene.pointerX, scene.pointerY);
 			var mesh = pickResult.pickedMesh;
 			var point = pickResult.pickedPoint;
 			if(evt.which == 1 || evt.which == 3) {

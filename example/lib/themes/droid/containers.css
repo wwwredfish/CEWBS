@@ -1,0 +1,9 @@
+/** MVCJS Container Styles **/
+
+.MVCJS .frame {
+	background-color: #0e0e0e;
+	border: 2px solid #222;
+	padding: 5px;
+	max-width: 100%;
+	box-sizing: border-box;
+}

@@ -23,8 +23,9 @@ sed -i -e "s/%VERSION%/$1/g" ../dist/CEWBS-$1-commonjs.js
 
 #Copy meshers folder for CommonJS edition
 cp -rf meshers ../dist/meshers
+cp -rf helpers ../dist/helpers
 
 ##FINALISE##
 #Finally copy new version to examples folder.
-cp ../dist/CEWBS-$1.js ../examples/lib/CEWBS.js
+cp ../dist/CEWBS-$1-debug.js ../example/lib/CEWBS.js
 

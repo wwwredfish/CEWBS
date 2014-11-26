@@ -1,0 +1,27 @@
+/** MVCJS Control Styles **/
+
+.MVCJS .button {
+	cursor: default;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	font-weight: bold;
+	font-size: 15px;
+	text-shadow: #28A 0px 1px 1px;
+	color: #EEE;
+	padding: 10px;
+	margin: 2px;
+	background-color: #171717;
+	text-align: center;
+	-webkit-transition: all 150ms;
+	transition: all 150ms;
+	display: inline-block;
+}
+
+.MVCJS .button:hover {
+	background-color: #234;
+}
+
+.MVCJS .button:active {
+	background-color: #28A;
+	color: #DDD;
+}

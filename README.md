@@ -19,7 +19,7 @@ Include CEWBS in your HTML file, after BabylonJS and its dependencies.
 ```html
 <script src="CEWBS.min.js"></script>
 ```
-Or, if using node-webkit, require the commonJS version. (The meshers directory must be in the same directory as CWEBS-commonjs.js.)
+Or, if using node-webkit, require the commonJS version. (The meshers and helpers directories must be in the same directory as CWEBS-commonjs.js.)
 ```javascript
 var CEWBS = require('CEWBS-commonjs.js');
 ```
@@ -92,7 +92,10 @@ window.addEventListener("click", function (evt) {
 `under` and `over`, which are both arrays of x,y,and z voxel coordinates in the picked mesh.
 `under` is the voxel that was picked, and `over` is the voxel adjacent to the face of the voxel that was picked.
 
-**Exporting Voxels:**
+
+Importing/Exporting Voxels:
+---
+**CEWBS Import/Export**
 To copy voxels in an interchangable format that is not dependant on the dimensions, use `exportVoxelData()`, which
 returns an object in the form of
 
@@ -105,8 +108,23 @@ returns an object in the form of
 	],
 }
 ```
+To import the format described above into a VoxelMesh, follow the procedure shown:
 
-This can then be converted to formats used by other programs.
+```javascript
+voxMesh1.setDimensions(exportedData.dimensions);
+voxMesh1.setVoxelBatch(exportedData.voxels, 1);
+```
+
+**Zoxel Import/Export**
+*Note, transparency is not supported and is ignored.*
+*Note, animations are not supported. Import/export only deals with frame 1.*
+
+To export a Zoxel string, run `exportZoxel()` on the VoxelMesh that you wish to export. This returns a JSON string which can then be
+written to a Zoxel (.zox) file.
+
+To import Zoxel files (.zox), create your CEWBS Voxel Mesh, then run `importZoxel(zoxelData)` with Zoxel's JSON string as the argument.
+This will set the voxels in your mesh, so don't use it on something you've already created.
+
 
 Coloring Voxels:
 ---

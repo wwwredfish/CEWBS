@@ -1,0 +1,41 @@
+<html>
+	<head>
+		<title>Select CEWBS Example</title>
+		<script src="../../lib/jquery.min.js"></script>
+		
+		<!-- Load MVCJS dependencies -->
+		<script>
+			_mvcjs = {
+				location: '../../lib/'
+			}
+		</script>
+		<script src="../../lib/mvc.min.js"></script>
+		<script src="../../lib/jscolor/jscolor.js"></script>
+		<script src="../../lib/jque.js"></script>
+		<script src="../../lib/jqdrag.js"></script>
+		<script src="../../lib/jqsimpleslider.js"></script>
+		<script src="../../base.js"></script>
+		
+		<!-- Load BabylonJS, CEWBS and dependencies-->
+		<script src="../../lib/babylon.js"></script>
+		<script src="../../lib/hand.js"></script>
+		<script src="../../lib/CEWBS.js"></script>
+		
+		<!-- Load base CSS styles -->
+		<link rel="stylesheet" href="../../css/main.css"></link>
+				
+		<script>
+			document.addEventListener("DOMContentLoaded", function () {
+				Base.createDemoList('../../');
+				Base.createScene();
+			}, false);
+		</script>
+	</head>
+	
+	<body>
+		<canvas id="viewport"></canvas>
+		<img id="crosshair" src="../../img/crosshair.png" />
+		<div id="MVCJS" class="MVCJS" style="height: 100%;"></div>
+	</body>
+
+</html>

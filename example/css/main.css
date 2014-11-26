@@ -1,13 +1,13 @@
 body {
 	overflow	: hidden;
-	padding		: 0;
-	margin		: 0;
+	padding		: 0 !important;
+	margin		: 0 !important;
 
 	color		: #222;
-	background-color: #BBB;
 	font-family	: arial;
 	font-size	: 100%;
 }
+
 #info .top {
 	position	: absolute;
 	top		: 0px;
@@ -46,7 +46,7 @@ body {
 	height: 100%;
 }
 
-#gunsight {
+#crosshair {
     position:absolute;
     top:50%;
     left:50%;

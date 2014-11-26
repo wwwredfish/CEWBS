@@ -1,0 +1,63 @@
+/** MVCJS Container Styles **/
+
+.MVCJS .frame {
+	box-sizing: border-box;
+	min-height: 50px;
+	min-width: 50px;
+	height: auto;
+	background-color: rgba(230, 230, 230, 0.5);
+	border: 2px solid #CCC;
+	padding: 5px;
+	border-radius: 2px;
+}
+
+.MVCJS .container {
+	padding: 5px;
+	max-width: 100%;
+	max-height: 100%;
+	box-sizing: border-box;
+}
+
+.MVCJS .modal {
+	overflow: hidden;
+	resize: both;
+	-webkit-box-shadow:  0px 0px 10px 1px rgba(0,0,0, 0.2);
+	-moz-box-shadow:  0px 0px 10px 1px rgba(0,0,0, 0.2);
+	box-shadow: 0px 0px 10px 1px rgba(0,0,0, 0.2);
+	padding-top: 30px;
+	border-radius: 5px 5px 5px 5px;
+	min-width: 130px;
+	min-height: 50px;
+}
+
+.MVCJS .tabs {
+	box-sizing: border-box;
+	margin-top: 24px;
+	border-top: 4px solid #CCC;
+}
+
+.MVCJS .tablist {
+	position: absolute;
+	top: -30px;
+	left: -2px;
+	box-sizing: border-box;
+	border-radius: 5px 5px 0px 0px;
+	border-bottom: 0px;
+	overflow: hidden;
+}
+
+.MVCJS .tablist .tab {
+	box-sizing: border-box;
+	border-radius: 0px;
+	padding-top: 5px;
+	max-height: 30px;
+	min-height: 30px;
+	margin: 0px;
+}
+
+
+.MVCJS .table {
+	width: 100%;
+	border-collapse:collapse;
+	box-sizing: border-box;
+}

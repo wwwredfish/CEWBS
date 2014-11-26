@@ -1,0 +1,330 @@
+/** MVCJS Control Styles **/
+
+.MVCJS {
+	background-color: #777;
+	box-sizing: border-box;
+}
+
+.MVCJS .label {
+	cursor: default;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	box-sizing: border-box;
+	border-radius: 2px;
+	padding: 6px;
+	height: 30px;
+	margin: 2px;
+	font-weight: normal;
+	font-size: 15px;
+	text-shadow: #fff 0px 1px 1px;
+	color: #333;
+	text-align: center;
+	display: inline-block;
+}
+
+.MVCJS .label:active {
+	box-shadow: none !important;
+}
+
+.MVCJS .button {
+	cursor: default;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	box-sizing: border-box;
+	border-radius: 2px;
+	font-weight: normal;
+	font-size: 15px;
+	text-shadow: #fff 0px 1px 1px;
+	color: #333;
+	padding: 6px;
+	height: 30px;
+	margin: 2px;
+	background-color: #F7F7F7;
+	text-align: center;
+	-webkit-transition: background-color 200ms, -webkit-box-shadow 100ms;
+	-moz-transition: background-color 200ms, -moz-box-shadow 100ms;
+	transition: background-color 200ms, box-shadow 100ms;
+	display: inline-block;
+}
+
+.MVCJS .button:hover {
+	background-color: #DDD;
+}
+
+.MVCJS .button:active {
+	background-color: #CCC;
+}
+
+.MVCJS .button.toggled {
+	background-color: #CCC;
+}
+
+.MVCJS .title {
+	cursor: default;
+	box-sizing: border-box;
+	position: absolute;
+	top: -2px;
+	left: -2px;
+	padding: 5px;
+	padding-bottom: 3px;
+	width: calc(100% + 4px);
+	min-height: 28px;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	border: 2px solid #CCC;
+	border-bottom: none;
+	background-color: #FFF;
+	color: #222;
+	font-weight: bold;
+	border-radius: 5px 5px 0px 0px;
+}
+
+.MVCJS .title:active {
+	cursor: move;
+}
+
+.MVCJS .titleBtn {
+	cursor: default;
+	position: relative;
+	display: block;
+	float:right;
+	font-size: 20px;
+	color: #222;
+	margin-right: 2px;
+	transition: all 200ms;
+
+}
+
+.MVCJS .titleBtn:hover {
+	color: #E00;
+}
+
+.MVCJS .titleBtn:active {
+	color: #700;
+}
+
+.MVCJS .textbox {
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	cursor: default;
+	margin: 2px;
+	padding: 2px;
+	padding-right: 3px;
+	box-sizing: border-box;
+	border-radius: 3px;
+	height: 30px;
+	font-size: 11pt;
+	font-weight: normal;
+	color: #333;
+	background-color: rgba(230, 230, 230, 0.8);
+	text-shadow: #fff 0px 1px 1px;
+}
+
+.MVCJS .textbox .prefixText {
+	margin: 3px;
+}
+
+.MVCJS .textInput {
+	box-sizing: border-box;
+	border-radius: 3px;
+	height: 26px;
+	padding-top: 0px;
+	padding-left: 4px;
+	padding-right: 4px;
+	font-size: 11pt;
+	background-color: #F8F8F8;
+	color: #555;
+	border: 1px solid #CCC;
+	-webkit-transition: all 100ms;
+	-moz-transition: all 100ms;
+	transition: all 100ms;
+}
+
+.MVCJS .textInput.rich {
+	border-radius: 3px 0px 0px 3px;
+	border-right: none;
+}
+
+.MVCJS .textInput:focus {
+	outline: none;
+	-webkit-box-shadow: inset 0px 0px 2px 1px #666;
+	-moz-box-shadow: inset 0px 0px 2px 1px #666;
+	box-shadow: inset 0px 0px 2px 1px #666;
+}
+
+.MVCJS .textAreaWrapper {
+	display: inline-block;
+}
+
+.MVCJS .textAreaWrapper .prefixText {
+	display: block;
+	height: 25px;
+	font-weight: bold;
+	text-align: left;
+	padding-left: 0px;
+}
+
+.MVCJS .textAreaWrapper .textArea {
+	display: block;
+	resize: both;
+	overflow: auto;
+	box-sizing: border-box;
+	border-radius: 3px;
+	padding: 4px;
+	font-size: 11pt;
+	background-color: #F8F8F8;
+	color: #555;
+	word-wrap: normal;
+	border: 1px solid #CCC;
+	-webkit-transition: box-shadow 100ms;
+	-moz-transition: box-shadow 100ms;
+	transition: box-shadow 100ms;
+}
+
+.MVCJS .textAreaWrapper .textArea:focus {
+	outline: none;
+	-webkit-box-shadow: inset 0px 0px 2px 1px #666;
+	-moz-box-shadow: inset 0px 0px 2px 1px #666;
+	box-shadow: inset 0px 0px 2px 1px #666;
+}
+
+.MVCJS .clearBtn {
+	box-sizing: border-box;
+	-webkit-transition: all 150ms;
+	-moz-transition: all 150ms;
+	transition: all 150ms;
+	border-radius: 0px 3px 3px 0px;
+	text-align: center;
+	color: #555;
+	background-color: #F8F8F8;
+	border: 1px solid #CCC;
+	border-left: none;
+	height: 26px;
+	width: 20px;
+	margin-left: 0px;
+	padding: 2px;
+	padding-top: 4px;
+}
+
+.MVCJS .clearBtn:hover {
+	color: #B55;
+	background-color: #CCC;
+}
+
+.MVCJS .clearBtn:active {
+	color: #933;
+	background-color: #BBB;
+}
+
+.MVCJS .range {
+	-webkit-transition: all 150ms;
+	-moz-transition: all 150ms;
+	transition: all 150ms;
+	min-width: 100px;
+	background-color: #F8F8F8;
+	padding: 2px;
+	height: 30px;
+	box-sizing: border-box;
+	border-radius: 3px;
+	border: 1px solid #CCC;
+	margin-top: 2px;
+	float: left;
+}
+
+.MVCJS .range:active {
+	border: 1px solid #AAA;
+}
+
+.MVCJS .range .numInput {
+	margin-top: -1px;
+	margin-left: -1px;
+	margin-right: 2px;
+	width: 40px;
+	float: left;
+	clear: left;
+}
+
+.MVCJS .slider .dragger {
+	box-sizing: border-box;
+	-webkit-transition: background 200ms, -webkit-box-shadow 150ms;
+	-moz-transition: background 200ms, -moz-box-shadow 150ms;
+	transition: background 200ms, box-shadow 150ms;
+	border: 1px solid #BBB;
+	background: #D1D1D1;
+	border-radius: 2px;
+	width: 13px;
+	height: 24px;
+}
+
+.MVCJS .slider .dragger:hover {
+	background: #DFDFDF;
+	border: 1px solid #AAA;
+}
+
+.MVCJS .slider .dragger:active {
+	background: #E5E5E5;
+	border: 1px solid #AAA;
+	-webkit-box-shadow: inset 0px 0px 2px 1px #999;
+	-moz-box-shadow: inset 0px 0px 2px 1px #999;
+	box-shadow: inset 0px 0px 2px 1px #999;
+}
+
+.MVCJS .slider > .track, .slider > .highlight-track {
+	height: 5px;
+	background-color: #BBB;
+	border-radius: 2px;
+}
+
+.MVCJS .tableRow:nth-of-type(odd) {
+  background-color: #EFEFEF;
+}
+
+.MVCJS .tableRow:nth-of-type(even) {
+  background-color: #DFDFDF;
+}
+
+.MVCJS .tableRow td {
+	width: auto;
+	padding: 5px;
+	cursor: default;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	box-sizing: border-box;
+	font-weight: normal;
+	font-size: 15px;
+	text-shadow: #fff 0px 1px 1px;
+	color: #333;
+}
+
+
+
+/* Additional States */
+
+.MVCJS .disabled {
+	background-color: #DDD !important;
+	color: #888 !important;
+	border-color: #888 !important;
+}
+
+.MVCJS .disabled:active {
+	-webkit-animation-duration: 300ms !important;
+	-webkit-animation-name: disabledBounce !important;
+	-webkit-animation-iteration-count: infinite !important;
+	-webkit-animation-direction: alternate !important;
+}
+
+
+@-webkit-keyframes disabledBounce {
+	0% {
+		background-color: #DDD;
+		color: #888;
+		border-color: #888;
+	}
+
+	100% {
+		background-color: #CCC ;
+		color: #B99;
+		border-color: #B99;
+		
+	}
+}

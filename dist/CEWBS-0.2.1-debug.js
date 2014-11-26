@@ -5,7 +5,9 @@ var meshers = {
 }
 
 var CEWBS = window.CEWBS = {};
-CEWBS.version = '0.2';
+CEWBS.Util = require('./helpers/util.js');
+
+CEWBS.version = '0.2.1';
 
 CEWBS.VoxelMesh = function(name, scene) {
 	BABYLON.Mesh.call(this, name, scene);
@@ -180,7 +182,7 @@ format:
 	],
 }
 */
-CEWBS.VoxelMesh.prototype.exportVoxelData = function(raw) {
+CEWBS.VoxelMesh.prototype.exportVoxelData = function() {
 	var convertedVoxels = [];
 	for (var i = 0; i < this.voxelData.voxels.length; i++) {
 		var voxel = this.voxelData.voxels[i];
@@ -194,7 +196,43 @@ CEWBS.VoxelMesh.prototype.exportVoxelData = function(raw) {
 	return {dimensions: this.voxelData.dimensions, voxels: convertedVoxels};
 }
 
+//Import a Zoxel file into a CEWBS VoxelMesh
+CEWBS.VoxelMesh.prototype.importZoxel = function(zoxelData) {
+	var cewbsData = {};
+	cewbsData.dimensions = [zoxelData.width, zoxelData.height, zoxelData.depth];
+	
+	cewbsData.voxels = zoxelData.frame1;
+	
+	for(var i = 0; i < cewbsData.voxels.length; i++) {
+		cewbsData.voxels[i][3] = parseInt(cewbsData.voxels[i][3].toString(16).substring(0,6), 16);
+	}
+	
+	this.setDimensions(cewbsData.dimensions)
+	this.setVoxelBatch(cewbsData.voxels, 0xFFFFFF);
+}
 
+//Export the contents of the mesh to Zoxel format.
+CEWBS.VoxelMesh.prototype.exportZoxel = function() {
+	var cewbsData = this.exportVoxelData();
+	var zoxelData = {};
+	zoxelData.creator = "CEWBS Exporter";
+	zoxelData.width = cewbsData.dimensions[0];
+	zoxelData.height = cewbsData.dimensions[1];
+	zoxelData.depth = cewbsData.dimensions[2];
+	
+	zoxelData.version = 1;
+	zoxelData.frames = 1;
+	
+	zoxelData.frame1 = cewbsData.voxels;
+	
+	for(var i = 0; i < zoxelData.frame1.length; i++) {
+		zoxelData.frame1[i][3] = parseInt(CEWBS.Util.rgb2hex(this.coloringFunction(zoxelData.frame1[i][3]))+'FF', 16);
+	}
+	
+	return zoxelData;
+}
+
+//Handle Raycasting and picking to get the voxel coordinates
 CEWBS.VoxelMesh.handlePick = function(pickResult) {
 	var mesh = pickResult.pickedMesh;
 	var point = pickResult.pickedPoint;
@@ -249,7 +287,32 @@ if(!window.CEWBS) {
 	module.exports = CEWBS;
 }
 
-},{"./meshers/greedy_tri.js":2,"./meshers/monotone.js":3}],2:[function(require,module,exports){
+},{"./helpers/util.js":2,"./meshers/greedy_tri.js":3,"./meshers/monotone.js":4}],2:[function(require,module,exports){
+var util = {};
+
+util.toHex = function(n) {
+	n = parseInt(n,10);
+	if (isNaN(n)) {return "00"};
+	
+	n = Math.max(0,Math.min(n,255));
+	return "0123456789ABCDEF".charAt((n-n%16)/16)
+	+ "0123456789ABCDEF".charAt(n%16);
+}
+
+util.rgb2hex = function(rgb) {
+	return util.toHex(rgb[0])+util.toHex(rgb[1])+util.toHex(rgb[2]);
+}
+
+util.hex2rgb = function(hexStr) {
+	R = parseInt((hexStr).substring(0,2),16);
+	G = parseInt((hexStr).substring(2,4),16);
+	B = parseInt((hexStr).substring(4,6),16);
+	return [R,G,B];
+}
+
+module.exports = util;
+
+},{}],3:[function(require,module,exports){
 var GreedyMesh = (function() {
 //Cache buffer internally
 var mask = new Int32Array(4096);
@@ -350,7 +413,7 @@ if(exports) {
   exports.mesher = GreedyMesh;
 }
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 
 var MonotoneMesh = (function(){
