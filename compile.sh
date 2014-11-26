@@ -1,8 +1,8 @@
 cd src
 rm -rf ../dist
 mkdir ../dist
-browserify COOBS.js -o ../dist/COOBS.js
-sed -i -e 's/var COOBS/var COOBS = window.COOBS/g' ../dist/COOBS.js
-uglifyjs ../dist/COOBS.js -c -o ../dist/COOBS.min.js
-cp COOBS.js ../dist/COOBS-commonjs.js
+browserify CEWBS.js -o ../dist/CEWBS.js
+sed -i -e 's/var CEWBS/var CEWBS = window.CEWBS/g' ../dist/CEWBS.js
+uglifyjs ../dist/CEWBS.js -c -o ../dist/CEWBS.min.js
+cp CEWBS.js ../dist/CEWBS-commonjs.js
 cp -rf meshers ../dist/meshers

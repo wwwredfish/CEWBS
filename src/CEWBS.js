@@ -3,28 +3,28 @@ var meshers = {
 	'monotone': require('./meshers/monotone.js').mesher,
 }
 
-var COOBS = {};
+var CEWBS = {};
 
-COOBS.VoxelMesh = function(name, scene) {
+CEWBS.VoxelMesh = function(name, scene) {
 	BABYLON.Mesh.call(this, name, scene);
 }
-COOBS.VoxelMesh.prototype = Object.create(BABYLON.Mesh.prototype);
-COOBS.VoxelMesh.prototype.constructor = COOBS.VoxelMesh;
-COOBS.VoxelMesh.prototype.mesher = meshers.greedy;
+CEWBS.VoxelMesh.prototype = Object.create(BABYLON.Mesh.prototype);
+CEWBS.VoxelMesh.prototype.constructor = CEWBS.VoxelMesh;
+CEWBS.VoxelMesh.prototype.mesher = meshers.greedy;
 
 //Default coloring function
-COOBS.VoxelMesh.prototype.coloringFunction = function(id) {
+CEWBS.VoxelMesh.prototype.coloringFunction = function(id) {
 	return [id/5, id/5, id/5];
 }
 
 //Stores the voxel volume information
-/*COOBS.VoxelMesh.prototype.voxelData = {
+/*CEWBS.VoxelMesh.prototype.voxelData = {
 	dimensions: [16,16,16],
 	voxels: null,
 }*/
 
 //Switch between the greedy mesher (faster) and the monotone mesher (more accurate)
-COOBS.VoxelMesh.prototype.setMesher = function(type) {
+CEWBS.VoxelMesh.prototype.setMesher = function(type) {
 	if(type == 'greedy') {
 		this.mesher = meshers.greedy;
 	} else if (type == 'monotone') {
@@ -35,7 +35,7 @@ COOBS.VoxelMesh.prototype.setMesher = function(type) {
 }
 
 //Set the voxel at x,y,z position, with the id metadata.
-COOBS.VoxelMesh.prototype.setVoxelAt = function(x,y,z, metaData) {
+CEWBS.VoxelMesh.prototype.setVoxelAt = function(x,y,z, metaData) {
 	if(this.voxelData.voxels != null) {
 		if(Array.isArray(x)) {
 			this.voxelData.voxels[x[0]+(x[1]*this.voxelData.dimensions[0])+(x[2]*this.voxelData.dimensions[0]*this.voxelData.dimensions[1])] = y;
@@ -49,7 +49,7 @@ COOBS.VoxelMesh.prototype.setVoxelAt = function(x,y,z, metaData) {
 
 //Set a collection of voxels at different positions. Each can have it's own id or use the group id.
 //Useful for importing the non-raw export.
-COOBS.VoxelMesh.prototype.setVoxelBatch = function(voxels, metaData) {
+CEWBS.VoxelMesh.prototype.setVoxelBatch = function(voxels, metaData) {
 	for(var i = 0; i < voxels.length; i++) {
 		var voxel = voxels[i];
 		if(voxel.length < 4 && metaData != null) {
@@ -61,7 +61,7 @@ COOBS.VoxelMesh.prototype.setVoxelBatch = function(voxels, metaData) {
 }
 
 //Returns the voxel id at coordinates x,y,z.
-COOBS.VoxelMesh.prototype.getVoxelAt = function(x,y,z) {
+CEWBS.VoxelMesh.prototype.getVoxelAt = function(x,y,z) {
 	if(this.voxelData.voxels != null) {
 		return this.voxelData.voxels[x+(y*this.voxelData.dimensions[0])+(z*this.voxelData.dimensions[0]*this.voxelData.dimensions[1])];
 	} else {
@@ -74,18 +74,18 @@ COOBS.VoxelMesh.prototype.getVoxelAt = function(x,y,z) {
 	dimensions: [x,y,z]
 	voxels: [] // Length should be dimensions x*y*z
 }*/
-COOBS.VoxelMesh.prototype.setVoxelData = function(voxelData) {
+CEWBS.VoxelMesh.prototype.setVoxelData = function(voxelData) {
 	this.voxelData = voxelData;
 }
 
 //Returns the entire voxel volume. 
 //Warning, this is dimension-dependant, so don't try to use it in a differently-sized volume. use exportVoxelData for that.
-COOBS.VoxelMesh.prototype.getVoxelData = function() {
+CEWBS.VoxelMesh.prototype.getVoxelData = function() {
 	return this.voxelData;
 }
 
 //Sets the dimensions of the voxel volume. Input should be ([x,y,z]);
-COOBS.VoxelMesh.prototype.setDimensions = function(dims) {
+CEWBS.VoxelMesh.prototype.setDimensions = function(dims) {
 	if (Array.isArray(dims) && dims.length == 3) {
 		if(this.voxelData == null) {
 			this.voxelData = {};
@@ -101,7 +101,7 @@ COOBS.VoxelMesh.prototype.setDimensions = function(dims) {
 }
 
 //Used to update the actual mesh after voxels have been set.
-COOBS.VoxelMesh.prototype.updateMesh = function() {
+CEWBS.VoxelMesh.prototype.updateMesh = function() {
 	var rawMesh = this.mesher(this.voxelData.voxels, this.voxelData.dimensions);
 
 	var positions = [];
@@ -149,7 +149,7 @@ COOBS.VoxelMesh.prototype.updateMesh = function() {
 
 //Set the origin (pivot point) of the mesh to the center of the dimensions.
 //If ignoreY is true, then the y axis will remain 0.
-COOBS.VoxelMesh.prototype.originToCenterOfBounds = function(ignoreY) {
+CEWBS.VoxelMesh.prototype.originToCenterOfBounds = function(ignoreY) {
 	var pivotX = -this.voxelData.dimensions[0]/2;
 	var pivotY = -this.voxelData.dimensions[1]/2;
 	var pivotZ = -this.voxelData.dimensions[2]/2;
@@ -162,7 +162,7 @@ COOBS.VoxelMesh.prototype.originToCenterOfBounds = function(ignoreY) {
 }
 
 //Sets the origin (pivot point) of the mesh.
-COOBS.VoxelMesh.prototype.setPivot = function(pivotX, pivotY, pivotZ) {
+CEWBS.VoxelMesh.prototype.setPivot = function(pivotX, pivotY, pivotZ) {
 	var pivot = BABYLON.Matrix.Translation(pivotX,pivotY,pivotZ);
 	
 	this.setPivotMatrix(pivot);
@@ -178,7 +178,7 @@ format:
 	],
 }
 */
-COOBS.VoxelMesh.prototype.exportVoxelData = function(raw) {
+CEWBS.VoxelMesh.prototype.exportVoxelData = function(raw) {
 	var convertedVoxels = [];
 	for (var i = 0; i < this.voxelData.voxels.length; i++) {
 		var voxel = this.voxelData.voxels[i];
@@ -193,7 +193,7 @@ COOBS.VoxelMesh.prototype.exportVoxelData = function(raw) {
 }
 
 
-COOBS.VoxelMesh.handlePick = function(pickResult) {
+CEWBS.VoxelMesh.handlePick = function(pickResult) {
 	var mesh = pickResult.pickedMesh;
 	var point = pickResult.pickedPoint;
 	
@@ -243,6 +243,6 @@ COOBS.VoxelMesh.handlePick = function(pickResult) {
 	}
 }
 
-if(!window.COOBS) {
-	module.exports = COOBS;
+if(!window.CEWBS) {
+	module.exports = CEWBS;
 }

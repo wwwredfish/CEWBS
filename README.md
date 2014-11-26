@@ -19,7 +19,7 @@ Include CEWBS in your HTML file, after BabylonJS and its dependencies.
 ```html
 <script src="CEWBS.min.js"></script>
 ```
-Or, if using node-webkit, require the commonJS version.
+Or, if using node-webkit, require the commonJS version. (The meshers directory must be in the same directory as CWEBS-commonjs.js.)
 ```javascript
 var CEWBS = require('CEWBS-commonjs.js');
 ```
