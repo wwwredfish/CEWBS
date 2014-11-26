@@ -1,4 +1,4 @@
-COOBS
+COOBS ([Demo](http://triblade9.wc.lt/COOBS/index.html)
 =====
 
 A Voxel Mesher for BabylonJS. Supports both Greedy And Monotone Meshing, based on http://mikolalysenko.github.io/MinecraftMeshes2/
@@ -170,7 +170,7 @@ then update the mesh.
 TODO:
 ---
 **Short Term:**
-* --Implement Picking-- DONE
+* ~~Implement Picking~~ DONE
 * Implement Damage levels (?)
 
 **Long Term Possibilities (Difficult due to meshing algorithms)**
