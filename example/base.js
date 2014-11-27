@@ -119,7 +119,6 @@ Base.createScene = function() {
 			return false;
 		}
     } else {
-		console.log(e.message);
 		Base.status.setText('Error: WebGL not supported or incorrectly initialized.');
 		Base.status.addClass('red');
 		

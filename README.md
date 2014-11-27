@@ -1,13 +1,13 @@
 CEWBS ([Demo](http://triblade9.wc.lt/CEWBS/index.html))
 =====
 
-A Voxel Mesher for BabylonJS. Supports both Greedy And Monotone Meshing, based on http://mikolalysenko.github.io/MinecraftMeshes2/
+A Voxel Mesher for BabylonJS. Uses Greedy Triangle Meshing, based on http://mikolalysenko.github.io/MinecraftMeshes2/
 
 Pardon the incredibly immature name, I was having a bout of 12-year-old-ness for some reason. (I'm 23.)
 
 Voxel Format:
 ---
-A voxel (when passed to the engine) must consist of an x, y, and z position (front/back, top/down, left/right) respectively, and an integer for an id. The id is used for determining which voxels are the same type and which are different, which is vital for optimizing the meshing process. ID 0 cannot be used, as it is interpereted as air.
+A voxel (when passed to the engine) must consist of an x, y, and z position (front/back, top/down, left/right) respectively, and an array, string, or integer for an id. (Integer is preferred, since all other types are converted to integers internally, which is slower.) (Objects cannot be used, as they are too slow to test for equality. Use arrays instead.) The id is used for determining which voxels are the same type and which are different, which is vital for optimizing the meshing process. ID 0 cannot be used, as it is interpereted as air.
 
 Any additional data must be stored separately, at least for the moment.
 
@@ -175,16 +175,8 @@ This is essentially a wrapper for
 var pivot = BABYLON.Matrix.Translation(x,y,z);
 voxMesh1.setPivotMatrix(pivot);
 ```
-
 and will likely be removed.
 
-**Change mesher algorithms**
-There are two meshing algorithms which can be used, greedy and monotone. (Both from http://mikolalysenko.github.io/MinecraftMeshes2/)
-Default is greedy. To select one, call
-
-```javascript
-voxMesh1.setMesher('monotone'); //Or greedy.
-```
 
 then update the mesh.
 

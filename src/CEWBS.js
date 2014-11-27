@@ -1,6 +1,5 @@
 var meshers = {
 	'greedy': require('./meshers/greedy_tri.js').mesher,
-	'monotone': require('./meshers/monotone.js').mesher,
 }
 
 var CEWBS = {};
@@ -18,23 +17,6 @@ CEWBS.VoxelMesh.prototype.mesher = meshers.greedy;
 //Default coloring function
 CEWBS.VoxelMesh.prototype.coloringFunction = function(id) {
 	return [id/5, id/5, id/5];
-}
-
-//Stores the voxel volume information
-/*CEWBS.VoxelMesh.prototype.voxelData = {
-	dimensions: [16,16,16],
-	voxels: null,
-}*/
-
-//Switch between the greedy mesher (faster) and the monotone mesher (more accurate)
-CEWBS.VoxelMesh.prototype.setMesher = function(type) {
-	if(type == 'greedy') {
-		this.mesher = meshers.greedy;
-	} else if (type == 'monotone') {
-		this.mesher = meshers.monotone;
-	} else {
-		return 'Error: type must be either "greedy", or "monotone".';
-	}
 }
 
 //Set the voxel at x,y,z position, with the id metadata.
