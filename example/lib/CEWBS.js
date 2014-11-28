@@ -6,7 +6,7 @@ var meshers = {
 var CEWBS = window.CEWBS = {};
 CEWBS.Util = require('./helpers/util.js');
 
-CEWBS.version = 'dev';
+CEWBS.version = '0.2.3';
 
 CEWBS.VoxelMesh = function(name, scene) {
 	BABYLON.Mesh.call(this, name, scene);
@@ -194,7 +194,7 @@ format:
 {
 	dimensions: [x,y,z],
 	voxels: [
-		[0,0,0, id, meta], //x,y,z coordinates, then the voxel id.
+		[0,0,0, id, meta], //x,y,z coordinates, then the voxel id, then metadata.
 		[1,1,0, id, meta],
 	],
 }
@@ -248,7 +248,7 @@ CEWBS.VoxelMesh.prototype.exportZoxel = function() {
 	zoxelData.frame1 = cewbsData.voxels;
 	
 	for(var i = 0; i < zoxelData.frame1.length; i++) {
-		var hexColor = CEWBS.Util.rgb2hex(this.coloringFunction(zoxelData.frame1[i][3]));
+		var hexColor = CEWBS.Util.rgb2hex(this.coloringFunction(zoxelData.frame1[i][3], zoxelData.frame1[i][4]));
 		if(hexColor.length <= 6) {
 			zoxelData.frame1[i][3] = parseInt(hexColor+'FF', 16);
 		} else {
