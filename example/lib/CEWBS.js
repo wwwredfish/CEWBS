@@ -6,7 +6,7 @@ var meshers = {
 var CEWBS = window.CEWBS = {};
 CEWBS.Util = require('./helpers/util.js');
 
-CEWBS.version = '0.2.2';
+CEWBS.version = 'dev';
 
 CEWBS.VoxelMesh = function(name, scene) {
 	BABYLON.Mesh.call(this, name, scene);
@@ -21,35 +21,50 @@ CEWBS.VoxelMesh.prototype.coloringFunction = function(id) {
 }
 
 //Set the voxel at x,y,z position, with the id metadata.
-CEWBS.VoxelMesh.prototype.setVoxelAt = function(x,y,z, metaData) {
+CEWBS.VoxelMesh.prototype.setVoxelAt = function(pos, id, meta) {
+	if(this.voxelData.voxels != null) {
+		if(Array.isArray(pos)) {
+			this.voxelData.voxels[this.positionToIndex(pos)] = [id,meta];
+			return true;
+		}
+	}
+	
+	return 'Error: please set the dimensions of the voxelData first!';
+}
+
+CEWBS.VoxelMesh.prototype.setMetaAt = function(pos, meta) {
 	if(this.voxelData.voxels != null) {
 		if(Array.isArray(x)) {
-			this.voxelData.voxels[x[0]+(x[1]*this.voxelData.dimensions[0])+(x[2]*this.voxelData.dimensions[0]*this.voxelData.dimensions[1])] = y;
-		} else {
-			this.voxelData.voxels[x+(y*this.voxelData.dimensions[0])+(z*this.voxelData.dimensions[0]*this.voxelData.dimensions[1])] = metaData;
+			var index = this.positionToIndex(pos);
+			if(Array.isArray(this.voxelData.voxels[index])) {
+				this.voxelData.voxels[this.positionToIndex(pos)][1] = meta;
+				return true;
+			}
 		}
-	} else {
-		return 'Error: please set the dimensions of the voxelData first!';
 	}
+	
+	return 'Error: please set the dimensions of the voxelData first!';
 }
 
 //Set a collection of voxels at different positions. Each can have it's own id or use the group id.
 //Useful for importing the non-raw export.
-CEWBS.VoxelMesh.prototype.setVoxelBatch = function(voxels, metaData) {
+CEWBS.VoxelMesh.prototype.setVoxelBatch = function(voxels, id, meta) {
 	for(var i = 0; i < voxels.length; i++) {
 		var voxel = voxels[i];
-		if(voxel.length < 4 && metaData != null) {
-			this.setVoxelAt(voxel, metaData);
+		if(voxel.length < 4 && meta != null) {
+			this.setVoxelAt(voxel, id, meta);
+		} else if (voxel.length < 5 && meta != null) {
+			this.setVoxelAt(voxel, voxel[3], meta);
 		} else {
-			this.setVoxelAt(voxel, voxel[3]);
+			this.setVoxelAt(voxel, voxel[3], voxel[4]);
 		}
 	}
 }
 
-//Returns the voxel id at coordinates x,y,z.
-CEWBS.VoxelMesh.prototype.getVoxelAt = function(x,y,z) {
+//Returns the voxel id at coordinates pos [x,y,z].
+CEWBS.VoxelMesh.prototype.getVoxelAt = function(pos) {
 	if(this.voxelData.voxels != null) {
-		return this.voxelData.voxels[x+(y*this.voxelData.dimensions[0])+(z*this.voxelData.dimensions[0]*this.voxelData.dimensions[1])];
+		return this.voxelData.voxels[this.positionToIndex(pos)];
 	} else {
 		return 'Error: please set the dimensions of the voxelData first!';
 	}
@@ -86,6 +101,14 @@ CEWBS.VoxelMesh.prototype.setDimensions = function(dims) {
 	}
 }
 
+CEWBS.VoxelMesh.prototype.indexToPosition = function(i) {
+	return [i % this.voxelData.dimensions[0], Math.floor((i / this.voxelData.dimensions[0]) % this.voxelData.dimensions[1]), Math.floor(i / (this.voxelData.dimensions[1] * this.voxelData.dimensions[0]))]
+}
+
+CEWBS.VoxelMesh.prototype.positionToIndex = function(pos) {
+	return pos[0]+(pos[1]*this.voxelData.dimensions[0])+(pos[2]*this.voxelData.dimensions[0]*this.voxelData.dimensions[1]);
+}
+
 //Used to update the actual mesh after voxels have been set.
 CEWBS.VoxelMesh.prototype.updateMesh = function() {
 	var rawMesh = this.mesher(this.voxelData.voxels, this.voxelData.dimensions);
@@ -108,16 +131,26 @@ CEWBS.VoxelMesh.prototype.updateMesh = function() {
 		var q = rawMesh.faces[i];
 		indices.push(q[2], q[1], q[0]);
 		for(var i2 = 0; i2 < 3; i2++) {
-			var color = this.coloringFunction(q[3]);
+			var color = this.coloringFunction(q[3], q[4]);
 			if(color != null) {
-				colors[q[i2]*3] = color[0]/255;
-				colors[(q[i2]*3)+1] = color[1]/255;
-				colors[(q[i2]*3)+2] = color[2]/255;
-			} else {
-				colors[q[i2]*3] = 1.5;
-				colors[(q[i2]*3)+1] = 0.3;
-				colors[(q[i2]*3)+2] = 1.5;
+				if(color.length == 4) {
+					colors[q[i2]*4] = color[0]/255;
+					colors[(q[i2]*4)+1] = color[1]/255;
+					colors[(q[i2]*4)+2] = color[2]/255;
+					colors[(q[i2]*4)+3] = color[3]/255;
+					continue;
+				} else if (color.length == 3) {
+					colors[q[i2]*4] = color[0]/255;
+					colors[(q[i2]*4)+1] = color[1]/255;
+					colors[(q[i2]*4)+2] = color[2]/255;
+					colors[(q[i2]*4)+3] = 1;
+					continue;
+				}
 			}
+			colors[q[i2]*4] = 1.5;
+			colors[(q[i2]*4)+1] = 0.3;
+			colors[(q[i2]*4)+2] = 1.5;
+			colors[(q[i2]*4)+3] = 1;
 		}
 	}
 
@@ -136,31 +169,33 @@ CEWBS.VoxelMesh.prototype.updateMesh = function() {
 //Set the origin (pivot point) of the mesh to the center of the dimensions.
 //If ignoreY is true, then the y axis will remain 0.
 CEWBS.VoxelMesh.prototype.originToCenterOfBounds = function(ignoreY) {
-	var pivotX = -this.voxelData.dimensions[0]/2;
-	var pivotY = -this.voxelData.dimensions[1]/2;
-	var pivotZ = -this.voxelData.dimensions[2]/2;
+	var pivot = [
+		-this.voxelData.dimensions[0]/2,
+		-this.voxelData.dimensions[1]/2,
+		-this.voxelData.dimensions[2]/2
+	]
 	
 	if(ignoreY) {
-		pivotY = 0;
+		pivot[1] = 0;
 	}
 	
-	this.setPivot(pivotX, pivotY, pivotZ);
+	this.setPivot(pivot);
 }
 
 //Sets the origin (pivot point) of the mesh.
-CEWBS.VoxelMesh.prototype.setPivot = function(pivotX, pivotY, pivotZ) {
-	var pivot = BABYLON.Matrix.Translation(pivotX,pivotY,pivotZ);
+CEWBS.VoxelMesh.prototype.setPivot = function(pivot) {
+	var pivot = BABYLON.Matrix.Translation(pivot[0],pivot[1],pivot[2]);
 	
 	this.setPivotMatrix(pivot);
 }
 
-/*Exports the voxel data to a more portable form which is dimension-independant and can be more compact.
+/*Exports the voxel data to a more portable form which is dimension-independent and can be more compact.
 format:
 {
 	dimensions: [x,y,z],
 	voxels: [
-		[0,0,0, 3], //x,y,z coordinates, then the voxel id.
-		[1,1,0, 1],
+		[0,0,0, id, meta], //x,y,z coordinates, then the voxel id.
+		[1,1,0, id, meta],
 	],
 }
 */
@@ -169,10 +204,10 @@ CEWBS.VoxelMesh.prototype.exportVoxelData = function() {
 	for (var i = 0; i < this.voxelData.voxels.length; i++) {
 		var voxel = this.voxelData.voxels[i];
 		if (voxel != null) {
-			var x = i % this.voxelData.dimensions[0];
-			var y = Math.floor((i / this.voxelData.dimensions[0]) % this.voxelData.dimensions[1]);
-			var z = Math.floor(i / (this.voxelData.dimensions[1] * this.voxelData.dimensions[0])); 
-			convertedVoxels.push([x,y,z,voxel]);
+			var pos = this.indexToPosition(i);
+			pos.push(voxel[0]);
+			pos.push(voxel[1]);
+			convertedVoxels.push(pos);
 		}
 	}
 	return {dimensions: this.voxelData.dimensions, voxels: convertedVoxels};
@@ -186,11 +221,16 @@ CEWBS.VoxelMesh.prototype.importZoxel = function(zoxelData) {
 	cewbsData.voxels = zoxelData.frame1;
 	
 	for(var i = 0; i < cewbsData.voxels.length; i++) {
+		cewbsData.voxels[i][4] = cewbsData.voxels[i][3];
 		cewbsData.voxels[i][3] = parseInt(cewbsData.voxels[i][3].toString(16).substring(0,6), 16);
 	}
 	
-	this.setDimensions(cewbsData.dimensions)
-	this.setVoxelBatch(cewbsData.voxels, 0xFFFFFF);
+	this.coloringFunction = function(id, meta) {
+		return CEWBS.Util.hex2rgb(meta.toString(16));
+	}
+	
+	this.setDimensions(cewbsData.dimensions);
+	this.setVoxelBatch(cewbsData.voxels, 0xFFFFFF, 0);
 }
 
 //Export the contents of the mesh to Zoxel format.
@@ -208,7 +248,12 @@ CEWBS.VoxelMesh.prototype.exportZoxel = function() {
 	zoxelData.frame1 = cewbsData.voxels;
 	
 	for(var i = 0; i < zoxelData.frame1.length; i++) {
-		zoxelData.frame1[i][3] = parseInt(CEWBS.Util.rgb2hex(this.coloringFunction(zoxelData.frame1[i][3]))+'FF', 16);
+		var hexColor = CEWBS.Util.rgb2hex(this.coloringFunction(zoxelData.frame1[i][3]));
+		if(hexColor.length <= 6) {
+			zoxelData.frame1[i][3] = parseInt(hexColor+'FF', 16);
+		} else {
+			zoxelData.frame1[i][3] = parseInt(hexColor, 16);
+		}
 	}
 	
 	return zoxelData;
@@ -254,7 +299,7 @@ CEWBS.VoxelMesh.handlePick = function(pickResult) {
 		voxel2 = [x,y,z-1];
 	}
 	
-	if(!mesh.getVoxelAt(voxel1[0],voxel1[1],voxel1[2])) {
+	if(!mesh.getVoxelAt(voxel1)) {	
 		pickResult.over = voxel1;
 		pickResult.under = voxel2;
 		return pickResult;
@@ -281,14 +326,24 @@ util.toHex = function(n) {
 	+ "0123456789ABCDEF".charAt(n%16);
 }
 
-util.rgb2hex = function(rgb) {
-	return util.toHex(rgb[0])+util.toHex(rgb[1])+util.toHex(rgb[2]);
+util.rgb2hex = function(rgba) {
+	if(rgba.length == 3) {
+		return util.toHex(rgb[0])+util.toHex(rgb[1])+util.toHex(rgb[2]);
+	} else if(rgba.length == 4) {
+		return util.toHex(rgb[0])+util.toHex(rgb[1])+util.toHex(rgb[2])+util.toHex(rgb[3]);
+	}
 }
 
 util.hex2rgb = function(hexStr) {
-	R = parseInt((hexStr).substring(0,2),16);
-	G = parseInt((hexStr).substring(2,4),16);
-	B = parseInt((hexStr).substring(4,6),16);
+	var R = parseInt((hexStr).substring(0,2),16);
+	var G = parseInt((hexStr).substring(2,4),16);
+	var B = parseInt((hexStr).substring(4,6),16);
+	
+	if(hexStr.length == 8) {
+		var A = parseInt((hexStr).substring(6,8),16);
+		return [R,G,B,A];
+	}
+	
 	return [R,G,B];
 }
 
@@ -298,7 +353,7 @@ module.exports = util;
 var GreedyMesh = (function() {
 //Cache buffer internally
 var mask = new Int32Array(4096);
-var origMask = new Array(4096);
+var meta = new Array(4096);
 
 return function(volume, dims) {
   function f(i,j,k) {
@@ -321,27 +376,22 @@ return function(volume, dims) {
       var n = 0;
       for(x[v]=0; x[v]<dims[v]; ++x[v])
       for(x[u]=0; x[u]<dims[u]; ++x[u], ++n) {
-		var a,b,origA,origB;
-        a = origA = (0    <= x[d]      ? f(x[0],      x[1],      x[2])      : 0),
-        b = origB = (x[d] <  dims[d]-1 ? f(x[0]+q[0], x[1]+q[1], x[2]+q[2]) : 0);
-
-		if(typeof a != 'number' && a != null) {
-			a = stringToChars(JSON.stringify(a));
-		}
-		
-		if(typeof b != 'number' && b != null) {
-			b = stringToChars(JSON.stringify(b));
-		}
-
-        if((!!origA) === (!!origB) ) {
+        var a = (0    <= x[d]      ? f(x[0],      x[1],      x[2])      : 0)
+          , b = (x[d] <  dims[d]-1 ? f(x[0]+q[0], x[1]+q[1], x[2]+q[2]) : 0);
+        var metaA,metaB;
+        
+        if(Array.isArray(a)) {metaA = a[1]; a = a[0]};
+        if(Array.isArray(b)) {metaB = b[1]; b = b[0]};
+        
+        if((!!a) === (!!b) ) {
           mask[n] = 0;
-          origMask[n] = 0;
-        } else if(!!origA) {
+          meta[n] = 0;
+        } else if(!!a) {
           mask[n] = a;
-          origMask[n] = origA;
+          meta[n] = metaA;
         } else {
           mask[n] = -b;
-          origMask[n] = origB;
+          meta[n] = metaB;
         }
       }
       //Increment x[d]
@@ -351,7 +401,7 @@ return function(volume, dims) {
       for(j=0; j<dims[v]; ++j)
       for(i=0; i<dims[u]; ) {
         var c = mask[n];
-        var origC = origMask[n];
+        var metaC = meta[n];
         if(!!c) {
           //Compute width
           for(w=1; c === mask[n+w] && i+w<dims[u]; ++w) {
@@ -386,8 +436,8 @@ return function(volume, dims) {
           vertices.push([x[0]+du[0],       x[1]+du[1],       x[2]+du[2]      ]);
           vertices.push([x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2]]);
           vertices.push([x[0]      +dv[0], x[1]      +dv[1], x[2]      +dv[2]]);
-          faces.push([vertex_count, vertex_count+1, vertex_count+2, origC]);
-          faces.push([vertex_count, vertex_count+2, vertex_count+3, origC]);
+          faces.push([vertex_count, vertex_count+1, vertex_count+2, c, metaC]);
+          faces.push([vertex_count, vertex_count+2, vertex_count+3, c, metaC]);
           
           //Zero-out mask
           for(l=0; l<h; ++l)
@@ -405,14 +455,6 @@ return function(volume, dims) {
   return { vertices:vertices, faces:faces };
 }
 })();
-
-function stringToChars(str) {
-	var num = 0;
-	for(var i = 0; i < str.length; i++) {
-		num+=str.charCodeAt(i);
-	}
-	return num;
-}
 
 if(exports) {
   exports.mesher = GreedyMesh;

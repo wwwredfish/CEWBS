@@ -32,13 +32,10 @@
 				var Player = {};
 				
 				$.getJSON("../../assets/body.zox", function(body) {
-					Player.body = new CEWBS.VoxelMesh('voxmesh1', Base.scene);
+					Player.body = new CEWBS.VoxelMesh('body1', Base.scene);
 					Player.body.importZoxel(body);
 					Player.body.originToCenterOfBounds();
-					
-					Player.body.coloringFunction = function(id) {
-						return CEWBS.Util.hex2rgb(id.toString(16));
-					}
+
 					Player.body.updateMesh();
 					Player.body.scaling = new BABYLON.Vector3(0.125,0.125,0.125);
 					Player.body.position = new BABYLON.Vector3(0,0,0);
@@ -49,9 +46,6 @@
 						Player.handl.parent = Player.body;
 						Player.handl.originToCenterOfBounds();
 						
-						Player.handl.coloringFunction = function(id) {
-							return CEWBS.Util.hex2rgb(id.toString(16));
-						}
 						Player.handl.updateMesh();
 						Player.handl.position = new BABYLON.Vector3(-3,9,-0.1);
 						
@@ -60,9 +54,6 @@
 						Player.handr.parent = Player.body;
 						Player.handr.originToCenterOfBounds();
 						
-						Player.handr.coloringFunction = function(id) {
-							return CEWBS.Util.hex2rgb(id.toString(16));
-						}
 						Player.handr.updateMesh();
 						Player.handr.position = new BABYLON.Vector3(13,9,-0.1);
 					});
@@ -73,9 +64,6 @@
 						Player.footl.parent = Player.body;
 						Player.footl.originToCenterOfBounds();
 						
-						Player.footl.coloringFunction = function(id) {
-							return CEWBS.Util.hex2rgb(id.toString(16));
-						}
 						Player.footl.updateMesh();
 						Player.footl.position = new BABYLON.Vector3(0.5,-2.8,3);
 						
@@ -84,9 +72,6 @@
 						Player.footr.parent = Player.body;
 						Player.footr.originToCenterOfBounds();
 						
-						Player.footr.coloringFunction = function(id) {
-							return CEWBS.Util.hex2rgb(id.toString(16));
-						}
 						Player.footr.updateMesh();
 						Player.footr.position = new BABYLON.Vector3(9.5,-2.8,3);
 					});
@@ -97,9 +82,6 @@
 						Player.head.parent = Player.body;
 						Player.head.originToCenterOfBounds();
 						
-						Player.head.coloringFunction = function(id) {
-							return CEWBS.Util.hex2rgb(id.toString(16));
-						}
 						Player.head.updateMesh();
 						Player.head.position = new BABYLON.Vector3(5,19,4);
 					});

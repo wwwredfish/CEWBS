@@ -7,9 +7,7 @@ Pardon the incredibly immature name, I was having a bout of 12-year-old-ness for
 
 Voxel Format:
 ---
-A voxel (when passed to the engine) must consist of an x, y, and z position (front/back, top/down, left/right) respectively, and an array, string, or integer for an id. (Integer is preferred, since all other types are converted to integers internally, which is slower.) (Objects cannot be used, as they are too slow to test for equality. Use arrays instead.) The id is used for determining which voxels are the same type and which are different, which is vital for optimizing the meshing process. ID 0 cannot be used, as it is interpereted as air.
-
-Any additional data must be stored separately, at least for the moment.
+A voxel (when passed to the engine) must consist of an x, y, and z position (front/back, top/down, left/right) respectively, an integer as an id, and any object for metadata.
 
 Internally, voxels are stored as a flat array for speed, so be careful when changing the dimensions of the mesh dynamically, as it will really flip out.
 
@@ -37,19 +35,19 @@ All voxel meshes can be rotated, scaled, positioned, and parented without proble
 
 To set voxels in the mesh, use
 ```javascript
-//setVoxelAt(x,y,z, meta); {Or ([x,y,z], meta)}
-voxMesh1.setVoxelAt(1,1,0, 2);
+//setVoxelAt([x,y,z], meta)
+voxMesh1.setVoxelAt([1,1,0], 2);
 voxMesh1.setVoxelAt([2,0,1], 3);
 ```
 or (Not recommended, all it does is loop over the array and call the above method.)
 ```javascript
-//setVoxelBatch(voxelArray, meta);
+//setVoxelBatch(voxelArray, id, meta);
 voxMesh1.setVoxelBatch([
 	[1,1,1],
 	[2,1,0],
-	[2,0,0],
+	[2,0,0, 4, {property:'value'}],
 	[0,0,0, 2]
-], 1);
+], 1, {property:'value'});
 ```
 After changing any voxel data, rebuild the optomized mesh using
 ```javascript
@@ -58,14 +56,14 @@ voxMesh1.updateMesh();
 
 Getting Voxels:
 ---
-To retrieve the id of a voxel at a given position, use `getVoxelAt(x,y,z)`.
+To retrieve the id of a voxel at a given position, use `getVoxelAt([x,y,z])`.
 
 You can also get the entirety of the voxel data using `getVoxelData()`.
 
 **Example:**
 
 ```javascript
-var id = voxMesh1.getVoxelAt(1,2,2);
+var id = voxMesh1.getVoxelAt([1,2,2]);
 ```
 
 Picking (Selecting the clicked voxel):
@@ -80,9 +78,9 @@ window.addEventListener("click", function (evt) {
 	if(mesh != null && mesh instanceof CEWBS.VoxelMesh) { //Make sure it's a CEWBS voxelmesh
 		var pickedVoxels = CEWBS.VoxelMesh.handlePick(pickResult); //Get the picked voxels object, which wraps pickResult
 		if(evt.which == 1) {
-			mesh.setVoxelAt(pickedVoxels.under, 0); //Remove the block that is pointed at.
+			mesh.setVoxelAt(pickedVoxels.under, 0, 0); //Remove the block that is pointed at.
 		} else if(evt.which == 3) {
-			mesh.setVoxelAt(pickedVoxels.over, 2); //Place a block over the one that is pointed at.
+			mesh.setVoxelAt(pickedVoxels.over, 2, 0); //Place a block over the one that is pointed at.
 		}
 		mesh.updateMesh(); //Update the mesh
 	}
@@ -104,8 +102,8 @@ returns an object in the form of
 {
 	dimensions: [x,y,z],
 	voxels: [
-		[0,0,0, 3], //x,y,z coordinates, then the voxel id.
-		[1,1,0, 1],
+		[0,0,0, id, meta], //x,y,z coordinates, then the voxel id, then metadata.
+		[1,1,0, id, meta],
 	],
 }
 ```
@@ -113,14 +111,21 @@ To import the format described above into a VoxelMesh, follow the procedure show
 
 ```javascript
 voxMesh1.setDimensions(exportedData.dimensions);
-voxMesh1.setVoxelBatch(exportedData.voxels, 1);
+voxMesh1.setVoxelBatch(exportedData.voxels, 1, 0);
 ```
 
 **[Zoxel](https://github.com/grking/zoxel) Import/Export**
 
-*Note, transparency is not supported and is ignored.*
+*Note: Transparency is partially supported, but may look ugly. To turn it on, set your VoxelMesh's hasVertexAlpha property to true."
 
-*Note, animations are not supported. Import/export only deals with frame 1.*
+*Note: The coloring function is automatically set when importing zoxel data. It's not recommended to change it. Here it is:*
+```javascript
+	function(id, meta) {
+		return CEWBS.Util.hex2rgb(meta.toString(16));
+	}
+```
+
+*Note: animations are not supported. Import/export only deals with frame 1.*
 
 To export a Zoxel string, run `exportZoxel()` on the VoxelMesh that you wish to export. This returns a JSON string which can then be
 written to a Zoxel (.zox) file.
@@ -166,7 +171,7 @@ voxMesh1.originToCenterOfBounds(true); //Ignores the Y axis. Origin of a 5x5x5 m
 Sets the pivot point of the mesh to an arbitrary point in the world space. Best called before positioning the mesh.
 
 ```javascript
-voxMesh1.setPivot(x,y,z);
+voxMesh1.setPivot([x,y,z]);
 ```
 
 This is essentially a wrapper for
@@ -177,14 +182,12 @@ voxMesh1.setPivotMatrix(pivot);
 ```
 and will likely be removed.
 
-
-then update the mesh.
-
 TODO:
 ---
 **Short Term:**
 * ~~Implement Picking~~ DONE
-* Implement Damage levels (?)
+* ~~Implement Damage levels~~ (Can be done with ids/metadata and updating the mesh every time a block is damaged)
+* Add proper transparency (Trying to think of a good way to do this. Probably requires running the mesher twice. Once for opaque and once for transparent.)
 
 **Long Term Possibilities (Difficult due to meshing algorithms)**
 * Ambient Occlusion (HARD)

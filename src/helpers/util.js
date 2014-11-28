@@ -9,14 +9,24 @@ util.toHex = function(n) {
 	+ "0123456789ABCDEF".charAt(n%16);
 }
 
-util.rgb2hex = function(rgb) {
-	return util.toHex(rgb[0])+util.toHex(rgb[1])+util.toHex(rgb[2]);
+util.rgb2hex = function(rgba) {
+	if(rgba.length == 3) {
+		return util.toHex(rgb[0])+util.toHex(rgb[1])+util.toHex(rgb[2]);
+	} else if(rgba.length == 4) {
+		return util.toHex(rgb[0])+util.toHex(rgb[1])+util.toHex(rgb[2])+util.toHex(rgb[3]);
+	}
 }
 
 util.hex2rgb = function(hexStr) {
-	R = parseInt((hexStr).substring(0,2),16);
-	G = parseInt((hexStr).substring(2,4),16);
-	B = parseInt((hexStr).substring(4,6),16);
+	var R = parseInt((hexStr).substring(0,2),16);
+	var G = parseInt((hexStr).substring(2,4),16);
+	var B = parseInt((hexStr).substring(4,6),16);
+	
+	if(hexStr.length == 8) {
+		var A = parseInt((hexStr).substring(6,8),16);
+		return [R,G,B,A];
+	}
+	
 	return [R,G,B];
 }
 
