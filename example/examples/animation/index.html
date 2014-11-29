@@ -14,6 +14,7 @@
 		<script src="../../lib/jque.js"></script>
 		<script src="../../lib/jqdrag.js"></script>
 		<script src="../../lib/jqsimpleslider.js"></script>
+		<script src="../../lib/keydrown.js"></script>
 		<script src="../../base.js"></script>
 		
 		<!-- Load BabylonJS, CEWBS and dependencies-->
@@ -25,10 +26,73 @@
 		<link rel="stylesheet" href="../../css/main.css"></link>
 				
 		<script>
+						
+			var voxColors = [
+				[0,0,0],
+				[20,120,0],
+				[0,122,0],
+				[20,124,0],
+				[0,126,0],
+				[20,128,0],
+				[0,130,0],
+				[20,132,0],
+				[0,134,0],
+				[20,136,0],
+				[0,138,0],
+				[20,140,0],
+				[255,0,0]
+			]
+		
 			document.addEventListener("DOMContentLoaded", function () {
 				Base.createDemoList('../../');
 				Base.createScene();
+				
+								
+				var ground = new CEWBS.VoxelMesh('ground', Base.scene);
+				ground.setVoxelData({dimensions: [64,1,64], voxels: generateVoxels([64,1,64])});
+				ground.coloringFunction = function(id) {
+					return voxColors[id];
+				}
+				ground.originToCenterOfBounds(true);
+				ground.updateMesh();
+				
+				Base.createPlayer(function() {
+					Base.Player.body.position.y = 4;
+					$.getJSON("../../assets/sword.zox", function(sword) {
+						var swordMesh = new CEWBS.VoxelMesh('sword', Base.scene);
+						swordMesh.importZoxel(sword);
+						swordMesh.parent = Base.Player.handr;
+						swordMesh.originToCenterOfBounds(true);
+						swordMesh.position.x = 2;
+						swordMesh.position.y = 2.7;
+						swordMesh.position.z = 1.5;
+						swordMesh.rotation.x = 4.6;
+						swordMesh.updateMesh();
+					});
+									
+					Base.scene.registerBeforeRender(function() {
+						var pointToIntersect = new BABYLON.Vector3(Base.Player.body.position.x, Base.Player.body.position.y-1.8, Base.Player.body.position.z);
+						if (!ground.intersectsPoint(pointToIntersect)){
+						   Base.Player.body.position.y -= 0.2;
+						}
+					});
+
+				});
 			}, false);
+
+			
+			function randomInt(minimum, maximum) {
+				return Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;	
+			}
+			
+			function generateVoxels(dims) {
+				var voxels = [];
+				for (var i = 0; i < dims[0]*dims[1]*dims[2]; i++) {
+					var rand = randomInt(1,5);
+					voxels.push(rand);
+				}
+				return voxels;
+			}
 		</script>
 	</head>
 	

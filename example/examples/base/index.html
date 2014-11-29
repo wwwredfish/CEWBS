@@ -14,6 +14,7 @@
 		<script src="../../lib/jque.js"></script>
 		<script src="../../lib/jqdrag.js"></script>
 		<script src="../../lib/jqsimpleslider.js"></script>
+		<script src="../../lib/keydrown.js"></script>
 		<script src="../../base.js"></script>
 		
 		<!-- Load BabylonJS, CEWBS and dependencies-->
@@ -28,68 +29,8 @@
 			document.addEventListener("DOMContentLoaded", function () {
 				Base.createDemoList('../../');
 				Base.createScene();
+				Base.createPlayer();
 				
-				var Player = {};
-				
-				$.getJSON("../../assets/body.zox", function(body) {
-					Player.body = new CEWBS.VoxelMesh('body1', Base.scene);
-					Player.body.importZoxel(body);
-					Player.body.originToCenterOfBounds();
-
-					Player.body.updateMesh();
-					Player.body.scaling = new BABYLON.Vector3(0.125,0.125,0.125);
-					Player.body.position = new BABYLON.Vector3(0,0,0);
-
-					$.getJSON("../../assets/hand.zox", function(hand) {
-						Player.handl = new CEWBS.VoxelMesh('hand1', Base.scene);
-						Player.handl.importZoxel(hand);
-						Player.handl.parent = Player.body;
-						Player.handl.originToCenterOfBounds();
-						
-						Player.handl.updateMesh();
-						Player.handl.position = new BABYLON.Vector3(-3,9,-0.1);
-						
-						Player.handr = new CEWBS.VoxelMesh('hand1', Base.scene);
-						Player.handr.importZoxel(hand);
-						Player.handr.parent = Player.body;
-						Player.handr.originToCenterOfBounds();
-						
-						Player.handr.updateMesh();
-						Player.handr.position = new BABYLON.Vector3(13,9,-0.1);
-					});
-					
-					$.getJSON("../../assets/foot.zox", function(foot) {
-						Player.footl = new CEWBS.VoxelMesh('foot1', Base.scene);
-						Player.footl.importZoxel(foot);
-						Player.footl.parent = Player.body;
-						Player.footl.originToCenterOfBounds();
-						
-						Player.footl.updateMesh();
-						Player.footl.position = new BABYLON.Vector3(0.5,-2.8,3);
-						
-						Player.footr = new CEWBS.VoxelMesh('foot1', Base.scene);
-						Player.footr.importZoxel(foot);
-						Player.footr.parent = Player.body;
-						Player.footr.originToCenterOfBounds();
-						
-						Player.footr.updateMesh();
-						Player.footr.position = new BABYLON.Vector3(9.5,-2.8,3);
-					});
-					
-					$.getJSON("../../assets/head.zox", function(head) {
-						Player.head = new CEWBS.VoxelMesh('voxmesh1', Base.scene);
-						Player.head.importZoxel(head);
-						Player.head.parent = Player.body;
-						Player.head.originToCenterOfBounds();
-						
-						Player.head.updateMesh();
-						Player.head.position = new BABYLON.Vector3(5,19,4);
-					});
-					
-					Base.scene.registerBeforeRender(function(){
-						//Player.body.position.z-=0.01;
-					});
-				});
 			}, false);
 		</script>
 	</head>

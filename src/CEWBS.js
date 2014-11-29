@@ -217,15 +217,14 @@ CEWBS.VoxelMesh.prototype.importZoxel = function(zoxelData) {
 	var cewbsData = {};
 	cewbsData.dimensions = [zoxelData.width, zoxelData.height, zoxelData.depth];
 	
-	cewbsData.voxels = zoxelData.frame1;
+	cewbsData.voxels = JSON.parse(JSON.stringify(zoxelData.frame1));
 	
 	for(var i = 0; i < cewbsData.voxels.length; i++) {
-		cewbsData.voxels[i][4] = cewbsData.voxels[i][3];
-		cewbsData.voxels[i][3] = parseInt(cewbsData.voxels[i][3].toString(16).substring(0,6), 16);
+		cewbsData.voxels[i][3] = cewbsData.voxels[i][3]/100;
 	}
 	
-	this.coloringFunction = function(id, meta) {
-		return CEWBS.Util.hex2rgb(meta.toString(16));
+	this.coloringFunction = function(id) {
+		return CEWBS.Util.hex2rgb((id*100).toString(16));
 	}
 	
 	this.setDimensions(cewbsData.dimensions);
