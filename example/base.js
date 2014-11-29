@@ -14,7 +14,8 @@ var Base = {
 		'S - Backward',
 		'A - Left',
 		'D - Right',
-		'F - Switch between flying and walking'
+		'F - Switch between flying and walking',
+		'C - Switch Cameras',
 	],
 	Player : {},
 };
