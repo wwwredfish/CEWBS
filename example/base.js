@@ -14,7 +14,7 @@ var Base = {
 		'S - Backward',
 		'A - Left',
 		'D - Right',
-		'F - Switch between flying and walking',
+		'F - Switch flying and walking',
 		'C - Switch Cameras',
 	],
 	Player : {},
@@ -27,28 +27,32 @@ Base.createScene = function() {
 			Base.engine = new BABYLON.Engine(Base.canvas, false);
 			
 			Base.scene = new BABYLON.Scene(Base.engine);
-			
 			Base.scene.gravity = new BABYLON.Vector3(0,-0.2,0);
+			Base.scene.clearColor = new BABYLON.Color3(0.2, 0.7, 0.8);;
+			Base.scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
+			Base.scene.fogDensity = 0.03;
+			Base.scene.fogColor = new BABYLON.Color3(0.2, 0.7, 0.8);
+			Base.scene.ambientColor = new BABYLON.Color3(0.3, 0.3, 0.1);
+
 			Base.first_person_camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 0, 0), Base.scene);
-			Base.first_person_camera.ellipsoid = new BABYLON.Vector3(0.6, 1.1, 0.6);
+			Base.first_person_camera.ellipsoid = new BABYLON.Vector3(0.6, 1.3, 0.6);
 			Base.first_person_camera.checkCollisions = true;
-			Base.first_person_camera.applyGravity = false;
-			Base.first_person_camera.keysUp = [0];
-			Base.first_person_camera.keysDown = [0];
-			Base.first_person_camera.keysLeft = [0];
-			Base.first_person_camera.keysRight = [0];
-			Base.first_person_camera.speed = 5;
+			Base.first_person_camera.applyGravity = true;
+			Base.first_person_camera.keysUp = [87];
+			Base.first_person_camera.keysDown = [83];
+			Base.first_person_camera.keysLeft = [65];
+			Base.first_person_camera.keysRight = [68];
+			Base.first_person_camera.speed = 1.5;
 			Base.first_person_camera.inertia = 0.6;
 			Base.first_person_camera.angularSensibility = 500;
 		
-			Base.first_person_camera.setTarget(BABYLON.Vector3.Zero());
 			Base.first_person_camera.rotation.y = Math.PI;	
 			
 			Base.third_person_camera = new BABYLON.ArcRotateCamera("camera2", 1, 0.8, 10, new BABYLON.Vector3(0, 0, 0), Base.scene);
 			
 			var light0 = new BABYLON.HemisphericLight("Hemi0", new BABYLON.Vector3(0, 1, 0), Base.scene);
-			light0.diffuse = new BABYLON.Color3(1.2, 1.2, 1.2);
-			light0.specular = new BABYLON.Color3(0.2, 0.2, 0.2);
+			light0.diffuse = new BABYLON.Color3(1.6, 1.6, 1.2);
+			light0.specular = new BABYLON.Color3(0.3, 0.3, 0.1);
 			light0.groundColor = new BABYLON.Color3(0.2, 0.2, 0.2);
 			
 			Base.axisIndicator = new BABYLON.Mesh('axisIndicator', Base.scene);
@@ -369,37 +373,43 @@ Base.createPlayer = function(callback) {
 			Base.scene.registerBeforeRender(function(){
 							
 				kd.W.down(function() {
-					Base.Player.body.translate(BABYLON.Axis.Z, 1, BABYLON.Space.Local);
+					if(Base.cameraMode == 1) {
+						Base.Player.body.translate(BABYLON.Axis.Z, 1, BABYLON.Space.Local);
+					}
+					
 				});
 				kd.W.press(beginWalkAnim);
 				kd.W.up(stopWalkAnim);
 				
 				kd.A.down(function() {
-					if(Base.cameraMode == 0) {
-						Base.Player.body.translate(BABYLON.Axis.X, -1, BABYLON.Space.Local);
-					} else {
+					if(Base.cameraMode == 1) {
 						Base.first_person_camera.rotation.y -= 0.1;
 					}
 				});
 				kd.A.press(beginWalkAnim);
 				kd.A.up(stopWalkAnim);
 				kd.S.down(function() {
-					Base.Player.body.translate(BABYLON.Axis.Z, -1, BABYLON.Space.Local);
-				});
+					if(Base.cameraMode == 1) {
+						Base.Player.body.translate(BABYLON.Axis.Z, -1, BABYLON.Space.Local);
+					}				});
 				kd.S.press(beginWalkAnim);
 				kd.S.up(stopWalkAnim);
 				kd.D.down(function() {
-					if(Base.cameraMode == 0) {
-						Base.Player.body.translate(BABYLON.Axis.X, 1, BABYLON.Space.Local);
-					} else {
+					if(Base.cameraMode == 1) {
 						Base.first_person_camera.rotation.y += 0.1;
 					}
 				});
 				kd.D.press(beginWalkAnim);
 				kd.D.up(stopWalkAnim);
-				Base.first_person_camera.position.x = Base.Player.body.position.x;
-				Base.first_person_camera.position.y = Base.Player.body.position.y+1;
-				Base.first_person_camera.position.z = Base.Player.body.position.z;
+				if(Base.cameraMode == 0) {
+					Base.Player.body.position.x = Base.first_person_camera.position.x
+					Base.Player.body.position.y = Base.first_person_camera.position.y-1;
+					Base.Player.body.position.z = Base.first_person_camera.position.z;
+				} else if (Base.cameraMode == 1) {
+					Base.first_person_camera.position.x = Base.Player.body.position.x
+					Base.first_person_camera.position.y = Base.Player.body.position.y+1;
+					Base.first_person_camera.position.z = Base.Player.body.position.z;
+				}
 				Base.Player.head.rotation.x = Base.first_person_camera.rotation.x;
 				Base.Player.head.rotation.z = Base.first_person_camera.rotation.z;
 				Base.Player.body.rotation.y = Base.first_person_camera.rotation.y;

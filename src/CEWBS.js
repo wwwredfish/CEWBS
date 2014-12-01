@@ -14,6 +14,10 @@ CEWBS.VoxelMesh.prototype = Object.create(BABYLON.Mesh.prototype);
 CEWBS.VoxelMesh.prototype.constructor = CEWBS.VoxelMesh;
 CEWBS.VoxelMesh.prototype.mesher = meshers.greedy;
 
+
+CEWBS.VoxelMesh.prototype.evaluateFunction = function(id, meta) {
+	return !!id;
+}
 //Default coloring function
 CEWBS.VoxelMesh.prototype.coloringFunction = function(id) {
 	return [id/5, id/5, id/5];
@@ -110,49 +114,76 @@ CEWBS.VoxelMesh.prototype.positionToIndex = function(pos) {
 
 //Used to update the actual mesh after voxels have been set.
 CEWBS.VoxelMesh.prototype.updateMesh = function() {
-	var rawMesh = this.mesher(this.voxelData.voxels, this.voxelData.dimensions);
-
+	var rawOpaqueMesh = this.mesher(this.voxelData.voxels, this.voxelData.dimensions, this.evaluateFunction, 0);
+	
 	var positions = [];
 	var indices = [];
 	var colors = [];
 	var normals = [];
 	
-	if(rawMesh.vertices.length < 1) {
-		this.isPickable = false;
-	}
-	
-	for(var i=0; i<rawMesh.vertices.length; ++i) {
-		var q = rawMesh.vertices[i];
+	for(var i=0; i<rawOpaqueMesh.vertices.length; ++i) {
+		var q = rawOpaqueMesh.vertices[i];
 		positions.push(q[0], q[1], q[2]);
 	}
 
-	for(var i=0; i<rawMesh.faces.length; ++i) {
-		var q = rawMesh.faces[i];
+	for(var i=0; i<rawOpaqueMesh.faces.length; ++i) {
+		var q = rawOpaqueMesh.faces[i];
 		indices.push(q[2], q[1], q[0]);
+		
+		//Get the color for this voxel
+		var color = this.coloringFunction(q[3], q[4]);
+		if(color == null || color.length < 3) {
+			color = [300,75,300,255];
+		} else if (color.length == 3) {
+			color.push(255);
+		}
+		
 		for(var i2 = 0; i2 < 3; i2++) {
-			var color = this.coloringFunction(q[3], q[4]);
-			if(color != null) {
-				if(color.length == 4) {
-					colors[q[i2]*4] = color[0]/255;
-					colors[(q[i2]*4)+1] = color[1]/255;
-					colors[(q[i2]*4)+2] = color[2]/255;
-					colors[(q[i2]*4)+3] = color[3]/255;
-					continue;
-				} else if (color.length == 3) {
-					colors[q[i2]*4] = color[0]/255;
-					colors[(q[i2]*4)+1] = color[1]/255;
-					colors[(q[i2]*4)+2] = color[2]/255;
-					colors[(q[i2]*4)+3] = 1;
-					continue;
-				}
-			}
-			colors[q[i2]*4] = 1.5;
-			colors[(q[i2]*4)+1] = 0.3;
-			colors[(q[i2]*4)+2] = 1.5;
-			colors[(q[i2]*4)+3] = 1;
+			colors[q[i2]*4] = color[0]/255;
+			colors[(q[i2]*4)+1] = color[1]/255;
+			colors[(q[i2]*4)+2] = color[2]/255;
+			colors[(q[i2]*4)+3] = color[3]/255;
+			continue;
 		}
 	}
-
+	
+	//Handle transparency (Broken)
+	if(this.hasVertexAlpha) {
+		var stride = positions.length/3;
+		
+		var rawTransparentMesh = this.mesher(this.voxelData.voxels, this.voxelData.dimensions, this.evaluateFunction, 1);
+		
+		for(var i=0; i<rawTransparentMesh.vertices.length; ++i) {
+			var q = rawTransparentMesh.vertices[i];
+			positions.push(q[0], q[1], q[2]);
+		}
+		
+		for(var i=0; i<rawTransparentMesh.faces.length; ++i) {
+			var q = rawTransparentMesh.faces[i];
+			indices.push(q[2]+stride, q[1]+stride, q[0]+stride);
+			
+			//Get the color for this voxel
+			var color = this.coloringFunction(q[3], q[4]);
+			if(color == null || color.length < 3) {
+				color = [300,75,300,255];
+			} else if (color.length == 3) {
+				color.push(255);
+			}
+			
+			for(var i2 = 0; i2 < 3; i2++) {
+				colors[((q[i2]+stride)*4)] = color[0]/255;
+				colors[((q[i2]+stride)*4)+1] = color[1]/255;
+				colors[((q[i2]+stride)*4)+2] = color[2]/255;
+				colors[((q[i2]+stride)*4)+3] = color[3]/255;
+				continue;
+			}
+		}
+	}
+	
+	if(positions.length < 1) {
+		this.isPickable = false;
+	}
+	
 	BABYLON.VertexData.ComputeNormals(positions, indices, normals);
 	var vertexData = new BABYLON.VertexData();
 	vertexData.positions = positions;

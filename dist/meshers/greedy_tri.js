@@ -3,7 +3,7 @@ var GreedyMesh = (function() {
 var mask = new Int32Array(4096);
 var meta = new Array(4096);
 
-return function(volume, dims) {
+return function(volume, dims, evaluateFunction, passID) {
   function f(i,j,k) {
     return volume[i + dims[0] * (j + dims[1] * k)];
   }
@@ -30,11 +30,11 @@ return function(volume, dims) {
         
         if(Array.isArray(a)) {metaA = a[1]; a = a[0]};
         if(Array.isArray(b)) {metaB = b[1]; b = b[0]};
-        
-        if((!!a) === (!!b) ) {
+
+        if(evaluateFunction(a, metaA, passID) === evaluateFunction(b, metaB, passID)) {
           mask[n] = 0;
           meta[n] = 0;
-        } else if(!!a) {
+        } else if(evaluateFunction(a, metaA)) {
           mask[n] = a;
           meta[n] = metaA;
         } else {
