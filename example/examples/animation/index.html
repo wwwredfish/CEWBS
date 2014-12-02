@@ -30,8 +30,8 @@
 				[0,0,0],
 				[20,120,0],
 				[0,122,0],
-				[20,124,0],
-				[0,126,0],
+				[0,150,300, 90],
+				[700,100,0, 150],
 				[20,128,0],
 				[0,130,0],
 				[20,132,0],
@@ -45,22 +45,41 @@
 			document.addEventListener("DOMContentLoaded", function () {
 				Base.createDemoList('../../');
 				Base.createScene();
-								
+
 				for(var i = 0; i<2; i++) {
 					for(var i2 = 0; i2<2; i2++) {
 						var chunk = new CEWBS.VoxelMesh(i+'-'+i2, Base.scene);
 						chunk.setVoxelData({dimensions: [16,6,16], voxels: generateVoxels([16,6,16])});
 						chunk.checkCollisions = true;
-					
+						chunk.transparentMesh.checkCollisions = true
+						chunk.hasTransparency = true;
 						chunk.coloringFunction = function(id, meta) {
 							return voxColors[id];
+						}
+
+						chunk.evaluateFunction = function(id, meta, passID) {
+							if(passID == 0 && meta != null) {
+								if(meta.isTransparent) {
+									return false;
+								} else {
+									return !!id;
+								}
+							} else if (passID == 1 && meta != null) {
+								if(meta.isTransparent) {
+									return !!id;
+								} else {
+									return false;
+								}
+							}
+							return !!id;
 						}
 					
 						chunk.originToCenterOfBounds(true);
 						chunk.updateMesh();
 						chunk.position = new BABYLON.Vector3(i*16,0,i2*16);
 					}
-				}
+ 				}
+				
 				var swordMesh;
 				var swords = [];
 				
@@ -172,8 +191,12 @@
 			function generateVoxels(dims) {
 				var voxels = [];
 				for (var i = 0; i < dims[0]*dims[1]*dims[2]; i++) {
-					var rand = randomInt(1,5);
-					voxels.push(rand);
+					var rand = randomInt(1,10);
+					if (rand == 3 || rand == 4){
+						voxels.push([rand, {isTransparent: true}]);
+					} else {
+						voxels.push([rand, {isTransparent: false}]);
+					}
 				}
 				return voxels;
 			}

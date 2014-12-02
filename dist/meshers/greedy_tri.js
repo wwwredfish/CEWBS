@@ -34,7 +34,7 @@ return function(volume, dims, evaluateFunction, passID) {
         if(evaluateFunction(a, metaA, passID) === evaluateFunction(b, metaB, passID)) {
           mask[n] = 0;
           meta[n] = 0;
-        } else if(evaluateFunction(a, metaA)) {
+        } else if(evaluateFunction(a, metaA, passID)) {
           mask[n] = a;
           meta[n] = metaA;
         } else {
