@@ -180,6 +180,7 @@ Base.createPlayer = function(callback) {
 		Base.Player.body.isVisible = false;
 		Base.third_person_camera.target = Base.Player.body;
 
+		var beginWalkAnim, stopWalkAnim;
 		$.getJSON("../../assets/hand.zox", function(hand) {
 			Base.Player.handl = new CEWBS.VoxelMesh('handl', Base.scene);
 			Base.Player.handl.importZoxel(hand);
@@ -265,81 +266,98 @@ Base.createPlayer = function(callback) {
 		    Base.Player.handr.animations.push(handrWalk);
 		    Base.Player.handr.anims.walk = Base.scene.beginAnimation(Base.Player.handr, 0, 30, true);
 
-
-		});
-		
-		$.getJSON("../../assets/foot.zox", function(foot) {
-			Base.Player.footl = new CEWBS.VoxelMesh('footl', Base.scene);
-			Base.Player.footl.importZoxel(foot);
-			Base.Player.footl.parent = Base.Player.body;
-			Base.Player.footl.originToCenterOfBounds();
-			Base.Player.footl.isVisible = false;
-			
-			Base.Player.footl.updateMesh();
-			Base.Player.footl.setPivot([-2,-3,0]);
-			Base.Player.footl.position = new BABYLON.Vector3(0.5,-2.8,3);
-			Base.Player.footl.anims = {};
-			
-			Base.Player.footr = new CEWBS.VoxelMesh('footr', Base.scene);
-			Base.Player.footr.importZoxel(foot);
-			Base.Player.footr.parent = Base.Player.body;
-			Base.Player.footr.originToCenterOfBounds();
-			Base.Player.footr.isVisible = false;
-			
-			Base.Player.footr.updateMesh();
-			Base.Player.footr.setPivot([2,-3,0]);
-			Base.Player.footr.position = new BABYLON.Vector3(5.5,-2.8,3);
-			Base.Player.footr.anims = {};
-
-			var footlWalk = new BABYLON.Animation(
-				"myAnimation",
-				"rotation.x",
-				30,
-				BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-				BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
+					
+			$.getJSON("../../assets/foot.zox", function(foot) {
+				Base.Player.footl = new CEWBS.VoxelMesh('footl', Base.scene);
+				Base.Player.footl.importZoxel(foot);
+				Base.Player.footl.parent = Base.Player.body;
+				Base.Player.footl.originToCenterOfBounds();
+				Base.Player.footl.isVisible = false;
 				
-			var keys = [];		
-			
-		    keys.push({
-		        frame: 0,
-		        value: 2,
-		    }, {
-		        frame: 15,
-		        value: -0.6,
-		    }, {
-		        frame: 30,
-		        value: 2,
-		    });
-		    
-		    footlWalk.setKeys(keys);
-		    
-		    Base.Player.footl.animations.push(footlWalk);
-		    Base.Player.footl.anims.walk = Base.scene.beginAnimation(Base.Player.footl, 0, 30, true);
-		    
-			var footrWalk = new BABYLON.Animation(
-				"myAnimation",
-				"rotation.x",
-				30,
-				BABYLON.Animation.ANIMATIONTYPE_FLOAT,
-				BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
+				Base.Player.footl.updateMesh();
+				Base.Player.footl.setPivot([-2,-3,0]);
+				Base.Player.footl.position = new BABYLON.Vector3(0.5,-2.8,3);
+				Base.Player.footl.anims = {};
 				
-			keys = [];		
-			
-		    keys.push({
-		        frame: 0,
-		        value: -0.6,
-		    }, {
-		        frame: 15,
-		        value: 2,
-		    }, {
-		        frame: 30,
-		        value: -0.6,
-		    });
-		    
-		    footrWalk.setKeys(keys);
-		    
-		    Base.Player.footr.animations.push(footrWalk);
-		    Base.Player.footr.anims.walk = Base.scene.beginAnimation(Base.Player.footr, 0, 30, true);
+				Base.Player.footr = new CEWBS.VoxelMesh('footr', Base.scene);
+				Base.Player.footr.importZoxel(foot);
+				Base.Player.footr.parent = Base.Player.body;
+				Base.Player.footr.originToCenterOfBounds();
+				Base.Player.footr.isVisible = false;
+				
+				Base.Player.footr.updateMesh();
+				Base.Player.footr.setPivot([2,-3,0]);
+				Base.Player.footr.position = new BABYLON.Vector3(5.5,-2.8,3);
+				Base.Player.footr.anims = {};
+	
+				var footlWalk = new BABYLON.Animation(
+					"myAnimation",
+					"rotation.x",
+					30,
+					BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+					BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
+					
+				var keys = [];		
+				
+			    keys.push({
+			        frame: 0,
+			        value: 2,
+			    }, {
+			        frame: 15,
+			        value: -0.6,
+			    }, {
+			        frame: 30,
+			        value: 2,
+			    });
+			    
+			    footlWalk.setKeys(keys);
+			    
+			    Base.Player.footl.animations.push(footlWalk);
+			    Base.Player.footl.anims.walk = Base.scene.beginAnimation(Base.Player.footl, 0, 30, true);
+			    
+				var footrWalk = new BABYLON.Animation(
+					"myAnimation",
+					"rotation.x",
+					30,
+					BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+					BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
+					
+				keys = [];		
+				
+			    keys.push({
+			        frame: 0,
+			        value: -0.6,
+			    }, {
+			        frame: 15,
+			        value: 2,
+			    }, {
+			        frame: 30,
+			        value: -0.6,
+			    });
+			    
+			    footrWalk.setKeys(keys);
+			    
+			    Base.Player.footr.animations.push(footrWalk);
+			    Base.Player.footr.anims.walk = Base.scene.beginAnimation(Base.Player.footr, 0, 30, true);
+			    
+			    beginWalkAnim = function() {
+					Base.Player.handl.anims.walk.restart();
+					Base.Player.handr.anims.walk.restart();
+					Base.Player.footl.anims.walk.restart();
+					Base.Player.footr.anims.walk.restart();
+				};
+				stopWalkAnim = function() {
+					Base.Player.handl.anims.walk.pause();
+					Base.Player.handr.anims.walk.pause();
+					Base.Player.footl.anims.walk.pause();
+					Base.Player.footr.anims.walk.pause();
+					Base.Player.handl.rotation.x = -4;
+					Base.Player.handr.rotation.x = -4;
+					Base.Player.footl.rotation.x = 0;
+					Base.Player.footr.rotation.x = 0;
+				};
+				stopWalkAnim();
+			});
 		});
 		
 		$.getJSON("../../assets/head.zox", function(head) {
@@ -352,24 +370,6 @@ Base.createPlayer = function(callback) {
 			Base.Player.head.position = new BABYLON.Vector3(5,15,4);
 			Base.Player.head.scaling = new BABYLON.Vector3(1.01,1.01,1.01);
 			
-					    
-	    	function beginWalkAnim() {
-				Base.Player.handl.anims.walk.restart();
-				Base.Player.handr.anims.walk.restart();
-				Base.Player.footl.anims.walk.restart();
-				Base.Player.footr.anims.walk.restart();
-			};
-			function stopWalkAnim() {
-				Base.Player.handl.anims.walk.pause();
-				Base.Player.handr.anims.walk.pause();
-				Base.Player.footl.anims.walk.pause();
-				Base.Player.footr.anims.walk.pause();
-				Base.Player.handl.rotation.x = -4;
-				Base.Player.handr.rotation.x = -4;
-				Base.Player.footl.rotation.x = 0;
-				Base.Player.footr.rotation.x = 0;
-			};
-			stopWalkAnim();
 			Base.scene.registerBeforeRender(function(){
 							
 				kd.W.down(function() {
