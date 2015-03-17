@@ -3,8 +3,6 @@ CEWBS ([Demo](http://triblade9.wc.lt/CEWBS/index.html))
 
 A Voxel Mesher for BabylonJS. Uses Greedy Triangle Meshing, based on http://mikolalysenko.github.io/MinecraftMeshes2/
 
-Pardon the incredibly immature name, I was having a bout of 12-year-old-ness for some reason. (I'm 23.)
-
 Voxel Format:
 ---
 A voxel (when passed to the engine) must consist of an x, y, and z position (front/back, top/down, left/right) respectively, an integer as an id, and any object for metadata.

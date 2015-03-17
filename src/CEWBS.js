@@ -9,9 +9,13 @@ CEWBS.version = '%VERSION%';
 
 CEWBS.VoxelMesh = function(name, scene) {
 	BABYLON.Mesh.call(this, name, scene);
-	
+	this.noVoxels = true;
+	this.oldVisibility = true;
+
 	//Set up transparent mesh
 	this.transparentMesh = new BABYLON.Mesh(name+'-tsp', scene);
+	this.transparentMesh.noVoxels = true;
+	this.transparentMesh.oldVisibility = true;
 	this.transparentMesh.hasVertexAlpha = true;
 	this.transparentMesh.parent = this;
 	
@@ -92,7 +96,7 @@ CEWBS.VoxelMesh.prototype.setVoxelData = function(voxelData) {
 	this.voxelData = voxelData;
 }
 
-//Returns the entire voxel volume. 
+//Returns the entire voxel volume.
 //Warning, this is dimension-dependant, so don't try to use it in a differently-sized volume. use exportVoxelData for that.
 CEWBS.VoxelMesh.prototype.getVoxelData = function() {
 	return this.voxelData;
@@ -125,17 +129,11 @@ CEWBS.VoxelMesh.prototype.positionToIndex = function(pos) {
 //Used to update the actual mesh after voxels have been set.
 CEWBS.VoxelMesh.prototype.updateMesh = function(passID) {
 		if(passID == null) passID = 0;
+		
 		var rawMesh = this.mesher(this.voxelData.voxels, this.voxelData.dimensions, this.evaluateFunction, passID);
 		
-		var positions = [];
 		var indices = [];
 		var colors = [];
-		var normals = [];
-		
-		for(var i=0; i<rawMesh.vertices.length; ++i) {
-			var q = rawMesh.vertices[i];
-			positions.push(q[0], q[1], q[2]);
-		}
 	
 		for(var i=0; i<rawMesh.faces.length; ++i) {
 			var q = rawMesh.faces[i];
@@ -157,27 +155,44 @@ CEWBS.VoxelMesh.prototype.updateMesh = function(passID) {
 				continue;
 			}
 		}
-		
-		if(positions.length < 1) {
-			this.isPickable = false;
-		}
-		
-		BABYLON.VertexData.ComputeNormals(positions, indices, normals);
+					
 		var vertexData = new BABYLON.VertexData();
-		vertexData.positions = positions;
+		vertexData.positions = rawMesh.vertices;
 		vertexData.indices = indices;
-		vertexData.normals = normals;
+		vertexData.normals = rawMesh.normals;
 		vertexData.colors = colors;
 		
 		if(!passID) {
-			vertexData.applyToMesh(this, 1);
-			this._updateBoundingInfo();
-			if(this.hasTransparency) {
-				this.updateMesh(1);
+			if(vertexData.positions.length > 0) {
+				if(this.noVoxels = true) {
+					this.isVisible = this.oldVisibility;
+					this.noVoxels = false;
+				}
+				
+				vertexData.applyToMesh(this, 1);
+				this._updateBoundingInfo();
+				
+				if(this.hasTransparency) {
+					this.updateMesh(1);
+				}
+			} else {
+				this.noVoxels = true;
+				this.oldVisibility = this.isVisible;
+				this.isVisible = false;
 			}
 		} else if (passID == 1) {
-			vertexData.applyToMesh(this.transparentMesh, 1);
-			this.transparentMesh._updateBoundingInfo();
+			if(vertexData.positions.length > 0) {
+				if(this.transparentMesh.noVoxels = true) {
+					this.transparentMesh.isVisible = this.transparentMesh.oldVisibility;
+					this.transparentMesh.noVoxels = false;
+				}
+				vertexData.applyToMesh(this.transparentMesh, 1);
+				this.transparentMesh._updateBoundingInfo();
+			} else {
+				this.transparentMesh.noVoxels = true;
+				this.transparentMesh.oldVisibility = this.transparentMesh.isVisible;
+				this.transparentMesh.isVisible = false;
+			}
 		}
 }
 
@@ -277,7 +292,7 @@ CEWBS.VoxelMesh.prototype.exportZoxel = function() {
 
 //Handle Raycasting and picking to get the voxel coordinates
 CEWBS.VoxelMesh.handlePick = function(pickResult) {
-	var mesh = pickResult.pickedMesh;
+	var mesh = pickResult.pickedMesh.root;
 	var point = pickResult.pickedPoint;
 	
 	var m = new BABYLON.Matrix();
@@ -315,7 +330,7 @@ CEWBS.VoxelMesh.handlePick = function(pickResult) {
 		voxel2 = [x,y,z-1];
 	}
 	
-	if(!mesh.getVoxelAt(voxel1)) {	
+	if(!mesh.getVoxelAt(voxel1)) {
 		pickResult.over = voxel1;
 		pickResult.under = voxel2;
 		return pickResult;

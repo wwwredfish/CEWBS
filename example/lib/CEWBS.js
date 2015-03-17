@@ -6,13 +6,17 @@ var meshers = {
 var CEWBS = window.CEWBS = {};
 CEWBS.Util = require('./helpers/util.js');
 
-CEWBS.version = '0.2.42';
+CEWBS.version = '0.2.5';
 
 CEWBS.VoxelMesh = function(name, scene) {
 	BABYLON.Mesh.call(this, name, scene);
-	
+	this.noVoxels = true;
+	this.oldVisibility = true;
+
 	//Set up transparent mesh
 	this.transparentMesh = new BABYLON.Mesh(name+'-tsp', scene);
+	this.transparentMesh.noVoxels = true;
+	this.transparentMesh.oldVisibility = true;
 	this.transparentMesh.hasVertexAlpha = true;
 	this.transparentMesh.parent = this;
 	
@@ -93,7 +97,7 @@ CEWBS.VoxelMesh.prototype.setVoxelData = function(voxelData) {
 	this.voxelData = voxelData;
 }
 
-//Returns the entire voxel volume. 
+//Returns the entire voxel volume.
 //Warning, this is dimension-dependant, so don't try to use it in a differently-sized volume. use exportVoxelData for that.
 CEWBS.VoxelMesh.prototype.getVoxelData = function() {
 	return this.voxelData;
@@ -126,17 +130,11 @@ CEWBS.VoxelMesh.prototype.positionToIndex = function(pos) {
 //Used to update the actual mesh after voxels have been set.
 CEWBS.VoxelMesh.prototype.updateMesh = function(passID) {
 		if(passID == null) passID = 0;
+		
 		var rawMesh = this.mesher(this.voxelData.voxels, this.voxelData.dimensions, this.evaluateFunction, passID);
 		
-		var positions = [];
 		var indices = [];
 		var colors = [];
-		var normals = [];
-		
-		for(var i=0; i<rawMesh.vertices.length; ++i) {
-			var q = rawMesh.vertices[i];
-			positions.push(q[0], q[1], q[2]);
-		}
 	
 		for(var i=0; i<rawMesh.faces.length; ++i) {
 			var q = rawMesh.faces[i];
@@ -158,27 +156,44 @@ CEWBS.VoxelMesh.prototype.updateMesh = function(passID) {
 				continue;
 			}
 		}
-		
-		if(positions.length < 1) {
-			this.isPickable = false;
-		}
-		
-		BABYLON.VertexData.ComputeNormals(positions, indices, normals);
+					
 		var vertexData = new BABYLON.VertexData();
-		vertexData.positions = positions;
+		vertexData.positions = rawMesh.vertices;
 		vertexData.indices = indices;
-		vertexData.normals = normals;
+		vertexData.normals = rawMesh.normals;
 		vertexData.colors = colors;
 		
 		if(!passID) {
-			vertexData.applyToMesh(this, 1);
-			this._updateBoundingInfo();
-			if(this.hasTransparency) {
-				this.updateMesh(1);
+			if(vertexData.positions.length > 0) {
+				if(this.noVoxels = true) {
+					this.isVisible = this.oldVisibility;
+					this.noVoxels = false;
+				}
+				
+				vertexData.applyToMesh(this, 1);
+				this._updateBoundingInfo();
+				
+				if(this.hasTransparency) {
+					this.updateMesh(1);
+				}
+			} else {
+				this.noVoxels = true;
+				this.oldVisibility = this.isVisible;
+				this.isVisible = false;
 			}
 		} else if (passID == 1) {
-			vertexData.applyToMesh(this.transparentMesh, 1);
-			this.transparentMesh._updateBoundingInfo();
+			if(vertexData.positions.length > 0) {
+				if(this.transparentMesh.noVoxels = true) {
+					this.transparentMesh.isVisible = this.transparentMesh.oldVisibility;
+					this.transparentMesh.noVoxels = false;
+				}
+				vertexData.applyToMesh(this.transparentMesh, 1);
+				this.transparentMesh._updateBoundingInfo();
+			} else {
+				this.transparentMesh.noVoxels = true;
+				this.transparentMesh.oldVisibility = this.transparentMesh.isVisible;
+				this.transparentMesh.isVisible = false;
+			}
 		}
 }
 
@@ -278,7 +293,7 @@ CEWBS.VoxelMesh.prototype.exportZoxel = function() {
 
 //Handle Raycasting and picking to get the voxel coordinates
 CEWBS.VoxelMesh.handlePick = function(pickResult) {
-	var mesh = pickResult.pickedMesh;
+	var mesh = pickResult.pickedMesh.root;
 	var point = pickResult.pickedPoint;
 	
 	var m = new BABYLON.Matrix();
@@ -316,7 +331,7 @@ CEWBS.VoxelMesh.handlePick = function(pickResult) {
 		voxel2 = [x,y,z-1];
 	}
 	
-	if(!mesh.getVoxelAt(voxel1)) {	
+	if(!mesh.getVoxelAt(voxel1)) {
 		pickResult.over = voxel1;
 		pickResult.under = voxel2;
 		return pickResult;
@@ -376,14 +391,16 @@ return function(volume, dims, evaluateFunction, passID) {
   function f(i,j,k) {
     return volume[i + dims[0] * (j + dims[1] * k)];
   }
+  
+  var vertices = [], faces = [], normals = [];
   //Sweep over 3-axes
-  var vertices = [], faces = [];
   for(var d=0; d<3; ++d) {
     var i, j, k, l, w, h
       , u = (d+1)%3
       , v = (d+2)%3
       , x = [0,0,0]
-      , q = [0,0,0];
+      , q = [0,0,0]
+      , nm;
     if(mask.length < dims[u] * dims[v]) {
       mask = new Int32Array(dims[u] * dims[v]);
     }
@@ -439,7 +456,7 @@ return function(volume, dims, evaluateFunction, passID) {
           //Add quad
           x[u] = i;  x[v] = j;
           var du = [0,0,0]
-            , dv = [0,0,0]; 
+            , dv = [0,0,0];
           if(c > 0) {
             dv[v] = h;
             du[u] = w;
@@ -448,13 +465,25 @@ return function(volume, dims, evaluateFunction, passID) {
             du[v] = h;
             dv[u] = w;
           }
-          var vertex_count = vertices.length;
-          vertices.push([x[0],             x[1],             x[2]            ]);
-          vertices.push([x[0]+du[0],       x[1]+du[1],       x[2]+du[2]      ]);
-          vertices.push([x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2]]);
-          vertices.push([x[0]      +dv[0], x[1]      +dv[1], x[2]      +dv[2]]);
+          
+          nm = [0,0,0]
+          nm[d] = c > 0 ? 1 : -1
+
+          
+          var vertex_count = vertices.length/3;
+          vertices.push(x[0],             x[1],             x[2],
+            x[0]+du[0],       x[1]+du[1],       x[2]+du[2]      ,
+            x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2],
+            x[0]      +dv[0], x[1]      +dv[1], x[2]      +dv[2]);
+
           faces.push([vertex_count, vertex_count+1, vertex_count+2, c, metaC]);
           faces.push([vertex_count, vertex_count+2, vertex_count+3, c, metaC]);
+
+          normals.push(nm[0], nm[1], nm[2],
+            nm[0], nm[1], nm[2],
+            nm[0], nm[1], nm[2],
+            nm[0], nm[1], nm[2]);
+
           
           //Zero-out mask
           for(l=0; l<h; ++l)
@@ -469,7 +498,7 @@ return function(volume, dims, evaluateFunction, passID) {
       }
     }
   }
-  return { vertices:vertices, faces:faces };
+  return { vertices: vertices, faces: faces, normals: normals };
 }
 })();
 

@@ -15,7 +15,7 @@
 		<script src="../../lib/jqdrag.js"></script>
 		<script src="../../lib/jqsimpleslider.js"></script>
 		<script src="../../lib/keydrown.js"></script>
-		<script src="../../base.js"></script>		
+		<script src="../../base.js"></script>
 		<!-- Load BabylonJS, CEWBS and dependencies-->
 		<script src="../../lib/babylon.js"></script>
 		<script src="../../lib/hand.js"></script>
@@ -45,6 +45,7 @@
 			document.addEventListener("DOMContentLoaded", function () {
 				Base.createDemoList('../../');
 				Base.createScene();
+				Base.createShaders();
 
 				for(var i = 0; i<2; i++) {
 					for(var i2 = 0; i2<2; i2++) {
@@ -73,6 +74,9 @@
 							}
 							return !!id;
 						}
+						
+						chunk.tick = 0;
+						var c = chunk
 					
 						chunk.originToCenterOfBounds(true);
 						chunk.updateMesh();
@@ -185,7 +189,7 @@
 
 			
 			function randomInt(minimum, maximum) {
-				return Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;	
+				return Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
 			}
 			
 			function generateVoxels(dims) {

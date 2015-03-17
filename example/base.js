@@ -23,7 +23,7 @@ var Base = {
 Base.createScene = function() {
 	if (BABYLON.Engine.isSupported()) {
 		try {
-		    Base.canvas = document.getElementById("viewport");
+			Base.canvas = document.getElementById("viewport");
 			Base.engine = new BABYLON.Engine(Base.canvas, false);
 			
 			Base.scene = new BABYLON.Scene(Base.engine);
@@ -46,7 +46,7 @@ Base.createScene = function() {
 			Base.first_person_camera.inertia = 0.6;
 			Base.first_person_camera.angularSensibility = 500;
 		
-			Base.first_person_camera.rotation.y = Math.PI;	
+			Base.first_person_camera.rotation.y = Math.PI;
 			
 			Base.third_person_camera = new BABYLON.ArcRotateCamera("camera2", 1, 0.8, 10, new BABYLON.Vector3(0, 0, 0), Base.scene);
 			
@@ -142,7 +142,7 @@ Base.createScene = function() {
 			
 			Base.engine.runRenderLoop(function () {
 				kd.tick();
-				Base.scene.render();			
+				Base.scene.render();
 			});
 		
 			window.addEventListener("resize", function () {
@@ -160,12 +160,15 @@ Base.createScene = function() {
 			
 			return false;
 		}
-    } else {
+	} else {
 		Base.status.setText('Error: WebGL not supported or incorrectly initialized.');
 		Base.status.addClass('red');
 		
 		return false;
-	}	
+	}
+}
+
+Base.createShaders = function() {
 }
 
 Base.createPlayer = function(callback) {
@@ -211,60 +214,60 @@ Base.createPlayer = function(callback) {
 				BABYLON.Animation.ANIMATIONTYPE_FLOAT,
 				BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
 			
-			var keys = [];  
+			var keys = [];
 				
-		    keys.push({
-		        frame: 0,
-		        value: -2,
-		    }, {
+			keys.push({
+				frame: 0,
+				value: -2,
+			}, {
 				frame: 5,
 				value: -2.5,
 			}, {
-		        frame: 15,
-		        value: -4.5,
-		    }, {
-		        frame: 25,
-		        value: -2.5,
-		    }, {
-		        frame: 30,
-		        value: -2,
-		    });
-		    
-		    handlWalk.setKeys(keys);
-		    
-		    Base.Player.handl.animations.push(handlWalk);
-		    Base.Player.handl.anims.walk = Base.scene.beginAnimation(Base.Player.handl, 0, 30, true);
-		    
-		    var handrWalk = new BABYLON.Animation(
+				frame: 15,
+				value: -4.5,
+			}, {
+				frame: 25,
+				value: -2.5,
+			}, {
+				frame: 30,
+				value: -2,
+			});
+			
+			handlWalk.setKeys(keys);
+			
+			Base.Player.handl.animations.push(handlWalk);
+			Base.Player.handl.anims.walk = Base.scene.beginAnimation(Base.Player.handl, 0, 30, true);
+			
+			var handrWalk = new BABYLON.Animation(
 				"myAnimation",
 				"rotation.x",
 				30,
 				BABYLON.Animation.ANIMATIONTYPE_FLOAT,
 				BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
 				
-			keys = [];		
+			keys = [];
 			
-		    keys.push({
-		        frame: 0,
-		        value: -4.5,
-		    }, {
+			keys.push({
+				frame: 0,
+				value: -4.5,
+			}, {
 				frame: 5,
 				value: -4,
 			}, {
-		        frame: 15,
-		        value: -2,
-		    }, {
-		        frame: 25,
-		        value: -4,
-		    }, {
-		        frame: 30,
-		        value: -4.5,
-		    });
-		    
-		    handrWalk.setKeys(keys);
-		    
-		    Base.Player.handr.animations.push(handrWalk);
-		    Base.Player.handr.anims.walk = Base.scene.beginAnimation(Base.Player.handr, 0, 30, true);
+				frame: 15,
+				value: -2,
+			}, {
+				frame: 25,
+				value: -4,
+			}, {
+				frame: 30,
+				value: -4.5,
+			});
+			
+			handrWalk.setKeys(keys);
+			
+			Base.Player.handr.animations.push(handrWalk);
+			Base.Player.handr.anims.walk = Base.scene.beginAnimation(Base.Player.handr, 0, 30, true);
 
 					
 			$.getJSON("../../assets/foot.zox", function(foot) {
@@ -297,24 +300,24 @@ Base.createPlayer = function(callback) {
 					BABYLON.Animation.ANIMATIONTYPE_FLOAT,
 					BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
 					
-				var keys = [];		
+				var keys = [];
 				
-			    keys.push({
-			        frame: 0,
-			        value: 2,
-			    }, {
-			        frame: 15,
-			        value: -0.6,
-			    }, {
-			        frame: 30,
-			        value: 2,
-			    });
-			    
-			    footlWalk.setKeys(keys);
-			    
-			    Base.Player.footl.animations.push(footlWalk);
-			    Base.Player.footl.anims.walk = Base.scene.beginAnimation(Base.Player.footl, 0, 30, true);
-			    
+				keys.push({
+					frame: 0,
+					value: 2,
+				}, {
+					frame: 15,
+					value: -0.6,
+				}, {
+					frame: 30,
+					value: 2,
+				});
+				
+				footlWalk.setKeys(keys);
+				
+				Base.Player.footl.animations.push(footlWalk);
+				Base.Player.footl.anims.walk = Base.scene.beginAnimation(Base.Player.footl, 0, 30, true);
+				
 				var footrWalk = new BABYLON.Animation(
 					"myAnimation",
 					"rotation.x",
@@ -322,25 +325,25 @@ Base.createPlayer = function(callback) {
 					BABYLON.Animation.ANIMATIONTYPE_FLOAT,
 					BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
 					
-				keys = [];		
+				keys = [];
 				
-			    keys.push({
-			        frame: 0,
-			        value: -0.6,
-			    }, {
-			        frame: 15,
-			        value: 2,
-			    }, {
-			        frame: 30,
-			        value: -0.6,
-			    });
-			    
-			    footrWalk.setKeys(keys);
-			    
-			    Base.Player.footr.animations.push(footrWalk);
-			    Base.Player.footr.anims.walk = Base.scene.beginAnimation(Base.Player.footr, 0, 30, true);
-			    
-			    beginWalkAnim = function() {
+				keys.push({
+					frame: 0,
+					value: -0.6,
+				}, {
+					frame: 15,
+					value: 2,
+				}, {
+					frame: 30,
+					value: -0.6,
+				});
+				
+				footrWalk.setKeys(keys);
+				
+				Base.Player.footr.animations.push(footrWalk);
+				Base.Player.footr.anims.walk = Base.scene.beginAnimation(Base.Player.footr, 0, 30, true);
+				
+				beginWalkAnim = function() {
 					Base.Player.handl.anims.walk.restart();
 					Base.Player.handr.anims.walk.restart();
 					Base.Player.footl.anims.walk.restart();

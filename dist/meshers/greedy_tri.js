@@ -7,14 +7,16 @@ return function(volume, dims, evaluateFunction, passID) {
   function f(i,j,k) {
     return volume[i + dims[0] * (j + dims[1] * k)];
   }
+  
+  var vertices = [], faces = [], normals = [];
   //Sweep over 3-axes
-  var vertices = [], faces = [];
   for(var d=0; d<3; ++d) {
     var i, j, k, l, w, h
       , u = (d+1)%3
       , v = (d+2)%3
       , x = [0,0,0]
-      , q = [0,0,0];
+      , q = [0,0,0]
+      , nm;
     if(mask.length < dims[u] * dims[v]) {
       mask = new Int32Array(dims[u] * dims[v]);
     }
@@ -70,7 +72,7 @@ return function(volume, dims, evaluateFunction, passID) {
           //Add quad
           x[u] = i;  x[v] = j;
           var du = [0,0,0]
-            , dv = [0,0,0]; 
+            , dv = [0,0,0];
           if(c > 0) {
             dv[v] = h;
             du[u] = w;
@@ -79,13 +81,25 @@ return function(volume, dims, evaluateFunction, passID) {
             du[v] = h;
             dv[u] = w;
           }
-          var vertex_count = vertices.length;
-          vertices.push([x[0],             x[1],             x[2]            ]);
-          vertices.push([x[0]+du[0],       x[1]+du[1],       x[2]+du[2]      ]);
-          vertices.push([x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2]]);
-          vertices.push([x[0]      +dv[0], x[1]      +dv[1], x[2]      +dv[2]]);
+          
+          nm = [0,0,0]
+          nm[d] = c > 0 ? 1 : -1
+
+          
+          var vertex_count = vertices.length/3;
+          vertices.push(x[0],             x[1],             x[2],
+            x[0]+du[0],       x[1]+du[1],       x[2]+du[2]      ,
+            x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2],
+            x[0]      +dv[0], x[1]      +dv[1], x[2]      +dv[2]);
+
           faces.push([vertex_count, vertex_count+1, vertex_count+2, c, metaC]);
           faces.push([vertex_count, vertex_count+2, vertex_count+3, c, metaC]);
+
+          normals.push(nm[0], nm[1], nm[2],
+            nm[0], nm[1], nm[2],
+            nm[0], nm[1], nm[2],
+            nm[0], nm[1], nm[2]);
+
           
           //Zero-out mask
           for(l=0; l<h; ++l)
@@ -100,7 +114,7 @@ return function(volume, dims, evaluateFunction, passID) {
       }
     }
   }
-  return { vertices:vertices, faces:faces };
+  return { vertices: vertices, faces: faces, normals: normals };
 }
 })();
 
