@@ -51,7 +51,7 @@ CEWBS.VoxelMesh.prototype.setVoxelAt = function(pos, id, meta) {
 
 CEWBS.VoxelMesh.prototype.setMetaAt = function(pos, meta) {
 	if(this.voxelData.voxels != null) {
-		if(Array.isArray(x)) {
+		if(Array.isArray(pos)) {
 			var index = this.positionToIndex(pos);
 			if(Array.isArray(this.voxelData.voxels[index])) {
 				this.voxelData.voxels[this.positionToIndex(pos)][1] = meta;
@@ -104,7 +104,7 @@ CEWBS.VoxelMesh.prototype.getVoxelData = function() {
 
 //Sets the dimensions of the voxel volume. Input should be ([x,y,z]);
 CEWBS.VoxelMesh.prototype.setDimensions = function(dims) {
-	if (Array.isArray(dims) && dims.length == 3) {
+	if (Array.isArray(dims) && dims.length === 3) {
 		if(this.voxelData == null) {
 			this.voxelData = {};
 		}
@@ -143,7 +143,7 @@ CEWBS.VoxelMesh.prototype.updateMesh = function(passID) {
 			var color = this.coloringFunction(q[3], q[4]);
 			if(color == null || color.length < 3) {
 				color = [300,75,300,255];
-			} else if (color.length == 3) {
+			} else if (color.length === 3) {
 				color.push(255);
 			}
 			
@@ -164,7 +164,7 @@ CEWBS.VoxelMesh.prototype.updateMesh = function(passID) {
 		
 		if(!passID) {
 			if(vertexData.positions.length > 0) {
-				if(this.noVoxels = true) {
+				if(this.noVoxels === true) {
 					this.isVisible = this.oldVisibility;
 					this.noVoxels = false;
 				}
@@ -180,9 +180,9 @@ CEWBS.VoxelMesh.prototype.updateMesh = function(passID) {
 				this.oldVisibility = this.isVisible;
 				this.isVisible = false;
 			}
-		} else if (passID == 1) {
+		} else if (passID === 1) {
 			if(vertexData.positions.length > 0) {
-				if(this.transparentMesh.noVoxels = true) {
+				if(this.transparentMesh.noVoxels === true) {
 					this.transparentMesh.isVisible = this.transparentMesh.oldVisibility;
 					this.transparentMesh.noVoxels = false;
 				}
@@ -216,9 +216,9 @@ CEWBS.VoxelMesh.prototype.originToCenterOfBounds = function(ignoreY) {
 
 //Sets the origin (pivot point) of the mesh.
 CEWBS.VoxelMesh.prototype.setPivot = function(pivot) {
-	var pivot = BABYLON.Matrix.Translation(pivot[0],pivot[1],pivot[2]);
+	var babylonPivot = BABYLON.Matrix.Translation(pivot[0],pivot[1],pivot[2]);
 	
-	this.setPivotMatrix(pivot);
+	this.setPivotMatrix(babylonPivot);
 }
 
 /*Exports the voxel data to a more portable form which is dimension-independent and can be more compact.
@@ -304,7 +304,7 @@ CEWBS.VoxelMesh.handlePick = function(pickResult) {
 	var offsetY = +(v.y-v.y.toFixed(0)).toFixed(4);
 	var offsetZ = +(v.z-v.z.toFixed(0)).toFixed(4);
 	
-	if(offsetX == 0) {
+	if(offsetX === 0) {
 		x = Math.round(v.x);
 		y = Math.floor(v.y);
 		z = Math.floor(v.z);
@@ -312,7 +312,7 @@ CEWBS.VoxelMesh.handlePick = function(pickResult) {
 
 		voxel1 = [x,y,z];
 		voxel2 = [x-1,y,z];
-	} else if (offsetY == 0) {
+	} else if (offsetY === 0) {
 		x = Math.floor(v.x);
 		y = Math.round(v.y);
 		z = Math.floor(v.z);
@@ -320,7 +320,7 @@ CEWBS.VoxelMesh.handlePick = function(pickResult) {
 
 		voxel1 = [x,y,z];
 		voxel2 = [x,y-1,z];
-	} else if (offsetZ == 0) {
+	} else if (offsetZ === 0) {
 		x = Math.floor(v.x);
 		y = Math.floor(v.y);
 		z = Math.round(v.z);

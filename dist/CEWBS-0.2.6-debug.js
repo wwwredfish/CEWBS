@@ -1,11 +1,12 @@
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var meshers = {
 	'greedy': require('./meshers/greedy_tri.js').mesher,
 }
 
-var CEWBS = {};
+var CEWBS = window.CEWBS = {};
 CEWBS.Util = require('./helpers/util.js');
 
-CEWBS.version = '0.2.5';
+CEWBS.version = '0.2.6';
 
 CEWBS.VoxelMesh = function(name, scene) {
 	BABYLON.Mesh.call(this, name, scene);
@@ -51,7 +52,7 @@ CEWBS.VoxelMesh.prototype.setVoxelAt = function(pos, id, meta) {
 
 CEWBS.VoxelMesh.prototype.setMetaAt = function(pos, meta) {
 	if(this.voxelData.voxels != null) {
-		if(Array.isArray(x)) {
+		if(Array.isArray(pos)) {
 			var index = this.positionToIndex(pos);
 			if(Array.isArray(this.voxelData.voxels[index])) {
 				this.voxelData.voxels[this.positionToIndex(pos)][1] = meta;
@@ -104,7 +105,7 @@ CEWBS.VoxelMesh.prototype.getVoxelData = function() {
 
 //Sets the dimensions of the voxel volume. Input should be ([x,y,z]);
 CEWBS.VoxelMesh.prototype.setDimensions = function(dims) {
-	if (Array.isArray(dims) && dims.length == 3) {
+	if (Array.isArray(dims) && dims.length === 3) {
 		if(this.voxelData == null) {
 			this.voxelData = {};
 		}
@@ -143,7 +144,7 @@ CEWBS.VoxelMesh.prototype.updateMesh = function(passID) {
 			var color = this.coloringFunction(q[3], q[4]);
 			if(color == null || color.length < 3) {
 				color = [300,75,300,255];
-			} else if (color.length == 3) {
+			} else if (color.length === 3) {
 				color.push(255);
 			}
 			
@@ -164,7 +165,7 @@ CEWBS.VoxelMesh.prototype.updateMesh = function(passID) {
 		
 		if(!passID) {
 			if(vertexData.positions.length > 0) {
-				if(this.noVoxels = true) {
+				if(this.noVoxels === true) {
 					this.isVisible = this.oldVisibility;
 					this.noVoxels = false;
 				}
@@ -180,9 +181,9 @@ CEWBS.VoxelMesh.prototype.updateMesh = function(passID) {
 				this.oldVisibility = this.isVisible;
 				this.isVisible = false;
 			}
-		} else if (passID == 1) {
+		} else if (passID === 1) {
 			if(vertexData.positions.length > 0) {
-				if(this.transparentMesh.noVoxels = true) {
+				if(this.transparentMesh.noVoxels === true) {
 					this.transparentMesh.isVisible = this.transparentMesh.oldVisibility;
 					this.transparentMesh.noVoxels = false;
 				}
@@ -216,9 +217,9 @@ CEWBS.VoxelMesh.prototype.originToCenterOfBounds = function(ignoreY) {
 
 //Sets the origin (pivot point) of the mesh.
 CEWBS.VoxelMesh.prototype.setPivot = function(pivot) {
-	var pivot = BABYLON.Matrix.Translation(pivot[0],pivot[1],pivot[2]);
+	var babylonPivot = BABYLON.Matrix.Translation(pivot[0],pivot[1],pivot[2]);
 	
-	this.setPivotMatrix(pivot);
+	this.setPivotMatrix(babylonPivot);
 }
 
 /*Exports the voxel data to a more portable form which is dimension-independent and can be more compact.
@@ -304,7 +305,7 @@ CEWBS.VoxelMesh.handlePick = function(pickResult) {
 	var offsetY = +(v.y-v.y.toFixed(0)).toFixed(4);
 	var offsetZ = +(v.z-v.z.toFixed(0)).toFixed(4);
 	
-	if(offsetX == 0) {
+	if(offsetX === 0) {
 		x = Math.round(v.x);
 		y = Math.floor(v.y);
 		z = Math.floor(v.z);
@@ -312,7 +313,7 @@ CEWBS.VoxelMesh.handlePick = function(pickResult) {
 
 		voxel1 = [x,y,z];
 		voxel2 = [x-1,y,z];
-	} else if (offsetY == 0) {
+	} else if (offsetY === 0) {
 		x = Math.floor(v.x);
 		y = Math.round(v.y);
 		z = Math.floor(v.z);
@@ -320,7 +321,7 @@ CEWBS.VoxelMesh.handlePick = function(pickResult) {
 
 		voxel1 = [x,y,z];
 		voxel2 = [x,y-1,z];
-	} else if (offsetZ == 0) {
+	} else if (offsetZ === 0) {
 		x = Math.floor(v.x);
 		y = Math.floor(v.y);
 		z = Math.round(v.z);
@@ -344,3 +345,165 @@ CEWBS.VoxelMesh.handlePick = function(pickResult) {
 if(!window.CEWBS) {
 	module.exports = CEWBS;
 }
+
+},{"./helpers/util.js":2,"./meshers/greedy_tri.js":3}],2:[function(require,module,exports){
+var util = {};
+
+util.toHex = function(n) {
+	n = parseInt(n,10);
+	if (isNaN(n)) {return "00"};
+	
+	n = Math.max(0,Math.min(n,255));
+	return "0123456789ABCDEF".charAt((n-n%16)/16)
+	+ "0123456789ABCDEF".charAt(n%16);
+}
+
+util.rgb2hex = function(rgba) {
+	if(rgba.length == 3) {
+		return util.toHex(rgb[0])+util.toHex(rgb[1])+util.toHex(rgb[2]);
+	} else if(rgba.length == 4) {
+		return util.toHex(rgb[0])+util.toHex(rgb[1])+util.toHex(rgb[2])+util.toHex(rgb[3]);
+	}
+}
+
+util.hex2rgb = function(hexStr) {
+	var R = parseInt((hexStr).substring(0,2),16);
+	var G = parseInt((hexStr).substring(2,4),16);
+	var B = parseInt((hexStr).substring(4,6),16);
+	
+	if(hexStr.length == 8) {
+		var A = parseInt((hexStr).substring(6,8),16);
+		return [R,G,B,A];
+	}
+	
+	return [R,G,B];
+}
+
+module.exports = util;
+
+},{}],3:[function(require,module,exports){
+var GreedyMesh = (function() {
+//Cache buffer internally
+var mask = new Int32Array(4096);
+var meta = new Array(4096);
+
+return function(volume, dims, evaluateFunction, passID) {
+  function f(i,j,k) {
+    return volume[i + dims[0] * (j + dims[1] * k)];
+  }
+  
+  var vertices = [], faces = [], normals = [];
+  //Sweep over 3-axes
+  for(var d=0; d<3; ++d) {
+    var i, j, k, l, w, h
+      , u = (d+1)%3
+      , v = (d+2)%3
+      , x = [0,0,0]
+      , q = [0,0,0]
+      , nm;
+    if(mask.length < dims[u] * dims[v]) {
+      mask = new Int32Array(dims[u] * dims[v]);
+    }
+    q[d] = 1;
+    for(x[d]=-1; x[d]<dims[d]; ) {
+      //Compute mask
+      var n = 0;
+      for(x[v]=0; x[v]<dims[v]; ++x[v])
+      for(x[u]=0; x[u]<dims[u]; ++x[u], ++n) {
+        var a = (0    <= x[d]      ? f(x[0],      x[1],      x[2])      : 0)
+          , b = (x[d] <  dims[d]-1 ? f(x[0]+q[0], x[1]+q[1], x[2]+q[2]) : 0);
+        var metaA,metaB;
+        
+        if(Array.isArray(a)) {metaA = a[1]; a = a[0]};
+        if(Array.isArray(b)) {metaB = b[1]; b = b[0]};
+
+        if(evaluateFunction(a, metaA, passID) === evaluateFunction(b, metaB, passID)) {
+          mask[n] = 0;
+          meta[n] = 0;
+        } else if(evaluateFunction(a, metaA, passID)) {
+          mask[n] = a;
+          meta[n] = metaA;
+        } else {
+          mask[n] = -b;
+          meta[n] = metaB;
+        }
+      }
+      //Increment x[d]
+      ++x[d];
+      //Generate mesh for mask using lexicographic ordering
+      n = 0;
+      for(j=0; j<dims[v]; ++j)
+      for(i=0; i<dims[u]; ) {
+        var c = mask[n];
+        var metaC = meta[n];
+        if(!!c) {
+          //Compute width
+          for(w=1; c === mask[n+w] && i+w<dims[u]; ++w) {
+          }
+          //Compute height (this is slightly awkward
+          var done = false;
+          for(h=1; j+h<dims[v]; ++h) {
+            for(k=0; k<w; ++k) {
+              if(c !== mask[n+k+h*dims[u]]) {
+                done = true;
+                break;
+              }
+            }
+            if(done) {
+              break;
+            }
+          }
+          //Add quad
+          x[u] = i;  x[v] = j;
+          var du = [0,0,0]
+            , dv = [0,0,0];
+          if(c > 0) {
+            dv[v] = h;
+            du[u] = w;
+          } else {
+            c = -c;
+            du[v] = h;
+            dv[u] = w;
+          }
+          
+          nm = [0,0,0]
+          nm[d] = c > 0 ? 1 : -1
+
+          
+          var vertex_count = vertices.length/3;
+          vertices.push(x[0],             x[1],             x[2],
+            x[0]+du[0],       x[1]+du[1],       x[2]+du[2]      ,
+            x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2],
+            x[0]      +dv[0], x[1]      +dv[1], x[2]      +dv[2]);
+
+          faces.push([vertex_count, vertex_count+1, vertex_count+2, c, metaC]);
+          faces.push([vertex_count, vertex_count+2, vertex_count+3, c, metaC]);
+
+          normals.push(nm[0], nm[1], nm[2],
+            nm[0], nm[1], nm[2],
+            nm[0], nm[1], nm[2],
+            nm[0], nm[1], nm[2]);
+
+          
+          //Zero-out mask
+          for(l=0; l<h; ++l)
+          for(k=0; k<w; ++k) {
+            mask[n+k+l*dims[u]] = 0;
+          }
+          //Increment counters and continue
+          i += w; n += w;
+        } else {
+          ++i;    ++n;
+        }
+      }
+    }
+  }
+  return { vertices: vertices, faces: faces, normals: normals };
+}
+})();
+
+if(exports) {
+  exports.mesher = GreedyMesh;
+}
+
+},{}]},{},[1]);
